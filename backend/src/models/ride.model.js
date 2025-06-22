@@ -45,6 +45,11 @@ const rideSchema = new mongoose.Schema({
     enum: ['Any', 'Male', 'Female'],
     default: 'Any',
   },
+  status: {
+    type: String,
+    enum: ['Open', 'Matched', 'Completed', 'Cancelled'],
+    default: 'Open',
+  },
 }, { timestamps: true });
 
 rideSchema.index({ sourceLocation: '2dsphere' });
