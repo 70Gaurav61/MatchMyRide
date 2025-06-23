@@ -17,8 +17,10 @@ app.use(cookieParser())
 
 import userRouter from "./routes/user.routes.js"
 import rideRouter from "./routes/ride.routes.js"
+import groupRouter from "./routes/group.routes.js"
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/rides", rideRouter)
+app.use("/api/v1/groups", groupRouter)
 
 export default app
