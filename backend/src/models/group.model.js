@@ -23,11 +23,6 @@ const groupSchema = new Schema(
                     type: Schema.Types.ObjectId,
                     ref: "Ride",
                     required: true
-                },
-                status: { 
-                    type: String, 
-                    enum: ["pending", "accepted", "rejected"], 
-                    default: "pending" 
                 }
             }
         ],
@@ -42,11 +37,6 @@ const groupSchema = new Schema(
                     type: Schema.Types.ObjectId,
                     ref: "Ride",
                     required: true
-                },
-                status: {
-                    type: String,
-                    enum: ["pending", "accepted", "rejected"],
-                    default: "pending"
                 }
             }
         ],
