@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_REACT_APP_MAPBOX_API_KEY;
 
@@ -6,6 +6,10 @@ const LocationInput = ({ label, value, onChange }) => {
   const [query, setQuery] = useState(value?.place_name || "");
   const [suggestions, setSuggestions] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    setQuery(value?.place_name || "");
+  }, [value]);
 
   const fetchSuggestions = async (q) => {
     if (!q) return setSuggestions([]);

@@ -75,6 +75,10 @@ const MapView = ({ source, destination, route, onSourceChange, onDestinationChan
       bounds.extend(source.coordinates);
       bounds.extend(destination.coordinates);
       map.fitBounds(bounds, { padding: 80 });
+    } else if (source && source.coordinates) {
+      map.flyTo({ center: source.coordinates, zoom: 14 });
+    } else if (destination && destination.coordinates) {
+      map.flyTo({ center: destination.coordinates, zoom: 14 });
     }
 
     if (route && map.getSource("route")) {
