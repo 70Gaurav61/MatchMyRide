@@ -24,8 +24,18 @@ const matchRides = async (newRide, user) => {
 
 export const createRideRequest = async (req, res) => {
   try {
-    const { source, destination, datetime, sourceLocation, destinationLocation, genderPreference } = req.body;
+    const { source, destination, datetime, sourceCoordinates, destinationCoordinates, genderPreference } = req.body;
 
+    const sourceLocation = {
+      type: 'Point',
+      coordinates: sourceCoordinates,
+    }
+
+    const destinationLocation = {
+      type: 'Point',
+      coordinates: destinationCoordinates,
+    }
+    
     const ride = await Ride.create({
       user: req.user._id,
       source,

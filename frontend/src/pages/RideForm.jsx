@@ -36,7 +36,7 @@ export default function RideForm() {
     const handleSubmit = async (e) => {
         e.preventDefault()
         try {
-            const res = await axios.post('/api/v1/rides/create', formData, {
+            const res = await axios.post('/rides/create', formData, {
                 withCredentials: true,
             })
             setMessage(res.data.message)

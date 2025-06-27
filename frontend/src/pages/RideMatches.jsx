@@ -14,7 +14,7 @@ export default function RideMatches() {
         const fetchMatches = async () => {
             try {
                 const res = await axios.post(
-                    '/api/v1/rides/matched',
+                    '/rides/matched',
                     { rideId },
                     { withCredentials: true }
                 )
@@ -45,7 +45,7 @@ export default function RideMatches() {
                     ride: match._id,
                 }))
             const res = await axios.post(
-                '/api/v1/groups/create', // check again the route
+                '/groups/create', // check again the route
                 {
                     name: 'My Ride Group',
                     rideId,
