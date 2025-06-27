@@ -16,6 +16,6 @@ router.delete('/delete', verifyJWT, deleteRide);
 router.patch('/update-time', verifyJWT, updateRideTime);
 router.patch('/update-status', verifyJWT, updateRideStatus);
 router.get('/user-rides', verifyJWT, getUserRides);
-router.get('/matched', verifyJWT, getRideMatches);
+router.post('/matched', verifyJWT, getRideMatches);
 
 export default router;

@@ -14,7 +14,7 @@ export default function RideMatches() {
         const fetchMatches = async () => {
             try {
                 const res = await axios.post(
-                    '/api/v1/rides/match',
+                    '/api/v1/rides/matched',
                     { rideId },
                     { withCredentials: true }
                 )
@@ -53,7 +53,11 @@ export default function RideMatches() {
                 },
                 { withCredentials: true }
             )
-            navigate('/group', { state: { groupId: res.data.group._id } })
+            if (res.data.group?._id)
+                navigate('/group', { state: { groupId: res.data.group._id } })
+            else
+                setMessage('Invalid response from server')
+
         } catch (err) {
             setMessage(err.response?.data?.message || 'Group creation failed')
         }
