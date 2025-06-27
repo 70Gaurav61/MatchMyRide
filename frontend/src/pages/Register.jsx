@@ -36,12 +36,11 @@ export default function Register(){
 		const form = new FormData()
 		Object.entries(formData).forEach(([key, val]) => {
 			if (key === 'avatar' && val) form.append('avatar', val)
-			else if (key === 'location') form.append('location', JSON.stringify(val))
 			else form.append(key, val)
 		})
 
 		try {
-			const res = await axios.post('/api/v1/users/register', form, {
+			const res = await axios.post('users/register', form, {
 				headers: { 'Content-Type': 'multipart/form-data' },
 				withCredentials: true
 			})

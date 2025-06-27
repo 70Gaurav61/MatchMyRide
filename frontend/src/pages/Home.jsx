@@ -10,7 +10,7 @@ export default function Home() {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get('/api/v1/users/me', {
+                const res = await axios.get('/users/me', {
                     withCredentials: true,
                 })
                 setUser(res.data.user)
@@ -24,7 +24,7 @@ export default function Home() {
 
     const handleLogout = async () => {
         try {
-            await axios.post('/api/v1/users/logout', {}, { withCredentials: true })
+            await axios.post('/users/logout', {}, { withCredentials: true })
             navigate('/login')
         } catch (err) {
             setMessage(err.response?.data?.message || 'Logout failed')
