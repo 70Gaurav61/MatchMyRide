@@ -21,7 +21,22 @@ const registerUser = async(req, res) => {
     if(gender !== "Male" && gender !== "Female") {
         throw new ApiError(400, `gender must be either "Male" or "Female"`)
     }
-    
+
+    let coordinates = [0, 0];
+    if (location) {
+        if (Array.isArray(location)) {
+            coordinates = location.map(Number);
+        } else if (typeof location === 'string') {
+            // Remove brackets and split by comma
+            const cleaned = location.replace(/[[\]\s]/g, '');
+            coordinates = cleaned.split(',').map(Number);
+        }
+
+        if (coordinates.length !== 2 || coordinates.some(isNaN)) {
+            throw new ApiError(400, 'Invalid location format. Expected two numeric values.');
+        }
+    }
+
     const existingUser = await User.findOne({email})
     
     if(existingUser) {
@@ -33,7 +48,7 @@ const registerUser = async(req, res) => {
         avatar = await uploadOnCloudinary(avatarLocalPath)
     }
 
-    const userLocation = location ? { type: "Point", coordinates: location } : { type: "Point", coordinates: [0, 0] };
+    const userLocation = { type: "Point", coordinates };
 
     const user = await User.create({
         email,
