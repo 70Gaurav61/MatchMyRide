@@ -145,7 +145,7 @@ export default function GroupPage() {
 				/>
 				<button
 					onClick={handleSendMessage}
-					className="bg-blue-600 text-white px-4 py-2 rounded"
+					className="bg-blue-600 text-white px-4 py-2 rounded hover:cursor-pointer"
 				>
 					Send
 				</button>
@@ -154,7 +154,7 @@ export default function GroupPage() {
 			<div className="flex gap-4">
 				<button
 					onClick={handleReadyToggle}
-					className={`px-4 py-2 rounded ${
+					className={`px-4 py-2 rounded hover:cursor-pointer ${
 						isReady ? 'bg-yellow-500' : 'bg-green-600'
 					} text-white`}
 				>
@@ -162,7 +162,7 @@ export default function GroupPage() {
 				</button>
 				<button
 					onClick={handleLeave}
-					className="px-4 py-2 bg-red-500 text-white rounded"
+					className="px-4 py-2 bg-red-500 text-white rounded hover:cursor-pointer"
 				>
 					Leave Group
 				</button>

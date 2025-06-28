@@ -47,70 +47,71 @@ export default function RideForm() {
     }
 
     return (
-        <div className="max-w-xl mx-auto p-4">
-            <h2 className="text-2xl font-bold mb-4">Create Ride</h2>
-            {message && <p className="text-red-500 mb-2">{message}</p>}
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    name="source"
-                    type="text"
-                    placeholder="Source Address"
-                    value={formData.source}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                    required
-                />
-                <button
-                    type="button"
-                    onClick={() => handleGeoLocate('source')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                >
-                    Use Current Location as Source
-                </button>
+    <div className="max-w-xl mx-auto p-4">
+        <h2 className="text-2xl font-bold mb-4 text-center text-green-700">Create Ride</h2>
+        {message && <p className="text-red-500 mb-2 text-center">{message}</p>}
+        <form onSubmit={handleSubmit} className="space-y-4 bg-white shadow-md rounded-xl p-6">
+            <input
+                name="source"
+                type="text"
+                placeholder="Source Address"
+                value={formData.source}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+            />
+            <button
+                type="button"
+                onClick={() => handleGeoLocate('source')}
+                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer transition"
+            >
+                Use Current Location as Source
+            </button>
 
-                <input
-                    name="destination"
-                    type="text"
-                    placeholder="Destination Address"
-                    value={formData.destination}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                    required
-                />
-                <button
-                    type="button"
-                    onClick={() => handleGeoLocate('destination')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
-                >
-                    Use Current Location as Destination
-                </button>
+            <input
+                name="destination"
+                type="text"
+                placeholder="Destination Address"
+                value={formData.destination}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+            />
+            <button
+                type="button"
+                onClick={() => handleGeoLocate('destination')}
+                className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 hover:cursor-pointer transition"
+            >
+                Use Current Location as Destination
+            </button>
 
-                <input
-                    name="datetime"
-                    type="datetime-local"
-                    value={formData.datetime}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                    required
-                />
-                <select
-                    name="genderPreference"
-                    value={formData.genderPreference}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                >
-                    <option value="Any">Any</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-                <button
-                    type="submit"
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
-                >
-                    Create Ride
-                </button>
-            </form>
-        </div>
-    )
+            <input
+                name="datetime"
+                type="datetime-local"
+                value={formData.datetime}
+                onChange={handleChange}
+                className="w-full p-2 border rounded"
+                required
+            />
+            <select
+                name="genderPreference"
+                value={formData.genderPreference}
+                onChange={handleChange}
+                className="w-full p-2 border rounded hover:cursor-pointer"
+            >
+                <option value="Any">Any</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </select>
+            <button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded hover:cursor-pointer transition"
+            >
+                Create Ride
+            </button>
+        </form>
+    </div>
+)
+
 
 }
