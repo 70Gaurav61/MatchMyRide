@@ -32,47 +32,53 @@ export default function Home() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-4">Welcome to RideShare</h1>
-            {message && <p className="text-red-500 mb-4">{message}</p>}
-            {user && (
-                <div className="flex items-center gap-4 mb-6">
-                    {user.avatar && (
-                        <img
-                            src={user.avatar}
-                            alt="Avatar"
-                            className="w-16 h-16 rounded-full object-cover border"
-                        />
-                    )}
-                    <div>
-                        <p className="text-lg font-semibold">Hello, {user.fullName}</p>
-                        <p className="text-sm text-gray-600">Email: {user.email}</p>
-                        {user.contactNumber && (
-                            <p className="text-sm text-gray-600">Phone: {user.contactNumber}</p>
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center px-4">
+            <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-8">
+                <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">Welcome to RideShare</h1>
+
+                {message && <p className="text-red-500 mb-4 text-center">{message}</p>}
+
+                {user && (
+                    <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 text-center sm:text-left">
+                        {user.avatar && (
+                            <img
+                                src={user.avatar}
+                                alt="Avatar"
+                                className="w-20 h-20 rounded-full object-cover border"
+                            />
                         )}
+                        <div>
+                            <p className="text-xl font-semibold text-gray-800">Hello, {user.fullName}</p>
+                            <p className="text-sm text-gray-600">Email: {user.email}</p>
+                            {user.contactNumber && (
+                                <p className="text-sm text-gray-600">Phone: {user.contactNumber}</p>
+                            )}
+                        </div>
                     </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button
+                        onClick={() => navigate('/ride-form')}
+                        className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-md transition hover:cursor-pointer"
+                    >
+                        Create Ride
+                    </button>
+                    <button
+                        onClick={() => navigate('/my-rides')}
+                        className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md transition hover:cursor-pointer"
+                    >
+                        View My Rides
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-md transition hover:cursor-pointer"
+                    >
+                        Logout
+                    </button>
                 </div>
-            )}
-            <div className="flex flex-wrap gap-4">
-                <button
-                    onClick={() => navigate('/ride-form')}
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:cursor-pointer"
-                >
-                    Create Ride
-                </button>
-                <button
-                    onClick={() => navigate('/my-rides')}
-                    className="px-4 py-2 bg-green-500 text-white rounded hover:cursor-pointer"
-                >
-                    View My Rides
-                </button>
-                <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 bg-red-500 text-white rounded hover:cursor-pointer"
-                >
-                    Logout
-                </button>
             </div>
         </div>
     )
+
 }

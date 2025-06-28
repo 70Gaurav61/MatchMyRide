@@ -52,33 +52,96 @@ export default function Register(){
 		}
 	}
 
-    return (
-		<div className="max-w-xl mx-auto p-4">
-			<h2 className="text-2xl font-bold mb-4">Register</h2>
-			{message && <p className="mb-2 text-red-500">{message}</p>}
-			<form onSubmit={handleSubmit} className="space-y-4">
-				<input name="fullName" type="text" placeholder="Full Name" value={formData.fullName} onChange={handleChange} className="w-full p-2 border rounded" required />
-				<input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} className="w-full p-2 border rounded" required />
-				<input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} className="w-full p-2 border rounded" required />
-				<select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 border rounded hover:cursor-pointer" required>
-					<option value="">Select Gender</option>
-					<option value="Male">Male</option>
-					<option value="Female">Female</option>
-				</select>
-				<input name="contactNumber" type="text" placeholder="Contact Number" value={formData.contactNumber} onChange={handleChange} className="w-full p-2 border rounded" />
-				<input name="avatar" type="file" accept="image/*" onChange={handleFileChange} className="w-full" />
-				<button type="button" onClick={handleGeolocation} className="bg-blue-500 text-white px-4 py-2 rounded hover:cursor-pointer">Use My Location</button>
-				<button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:cursor-pointer">Register</button>
-			</form>
-			<div className="text-center mt-4">
-                <span className="text-sm text-gray-600">Already have an account?</span>
-                <button
-                    onClick={() => navigate('/login')}
-                    className="ml-2 text-blue-600 hover:underline text-sm hover:cursor-pointer"
-                >
-                    Login
-                </button>
-            </div>
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-white flex items-center justify-center px-4 py-8">
+			<div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8 sm:p-10">
+				<h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 mb-6">
+					Create Your Account
+				</h2>
+				{message && (
+					<p className="mb-4 text-center text-sm text-red-600">{message}</p>
+				)}
+				<form onSubmit={handleSubmit} className="space-y-5">
+					<input
+						name="fullName"
+						type="text"
+						placeholder="Full Name"
+						value={formData.fullName}
+						onChange={handleChange}
+						className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+						required
+					/>
+					<input
+						name="email"
+						type="email"
+						placeholder="Email"
+						value={formData.email}
+						onChange={handleChange}
+						className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+						required
+					/>
+					<input
+						name="password"
+						type="password"
+						placeholder="Password"
+						value={formData.password}
+						onChange={handleChange}
+						className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+						required
+					/>
+					<select
+						name="gender"
+						value={formData.gender}
+						onChange={handleChange}
+						className="w-full p-3 border border-gray-300 rounded-xl bg-white hover:cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400"
+						required
+					>
+						<option value="">Select Gender</option>
+						<option value="Male">Male</option>
+						<option value="Female">Female</option>
+					</select>
+					<input
+						name="contactNumber"
+						type="text"
+						placeholder="Contact Number"
+						value={formData.contactNumber}
+						onChange={handleChange}
+						className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
+					/>
+					<input
+						name="avatar"
+						type="file"
+						accept="image/*"
+						onChange={handleFileChange}
+						className="w-full text-sm hover:cursor-pointer"
+					/>
+					<div className="flex justify-between gap-2">
+						<button
+							type="button"
+							onClick={handleGeolocation}
+							className="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200 hover:cursor-pointer"
+						>
+							Use My Location
+						</button>
+						<button
+							type="submit"
+							className="w-1/2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 hover:cursor-pointer"
+						>
+							Register
+						</button>
+					</div>
+				</form>
+				<div className="text-center mt-6">
+					<span className="text-sm text-gray-600">Already have an account?</span>
+					<button
+						onClick={() => navigate('/login')}
+						className="ml-2 text-blue-600 hover:underline text-sm hover:cursor-pointer"
+					>
+						Login
+					</button>
+				</div>
+			</div>
 		</div>
 	)
+
 }
