@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import LocationInput from "./LocationInput";
 import MapView from "./MapView";
 import axiosInstance from "../api/axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const MAPBOX_TOKEN = import.meta.env.VITE_REACT_APP_MAPBOX_API_KEY;
 
@@ -20,6 +21,7 @@ const MapNavigation = () => {
   });
   const [message, setMessage] = useState('')
   const [locating, setLocating] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const now = new Date();
@@ -123,6 +125,7 @@ const MapNavigation = () => {
 
   const handleCreateRide = async (e) => {
     try {
+      e.preventDefault();
       const res = await axiosInstance.post('/rides/create', formData)
       setMessage(res.data.message)
       navigate('/my-rides')
