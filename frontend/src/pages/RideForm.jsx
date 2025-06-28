@@ -63,7 +63,7 @@ export default function RideForm() {
                 <button
                     type="button"
                     onClick={() => handleGeoLocate('source')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:cursor-pointer"
                 >
                     Use Current Location as Source
                 </button>
@@ -74,13 +74,13 @@ export default function RideForm() {
                     placeholder="Destination Address"
                     value={formData.destination}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded hover:cursor-pointer"
                     required
                 />
                 <button
                     type="button"
                     onClick={() => handleGeoLocate('destination')}
-                    className="bg-blue-500 text-white px-3 py-1 rounded"
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:cursor-pointer"
                 >
                     Use Current Location as Destination
                 </button>
@@ -105,7 +105,7 @@ export default function RideForm() {
                 </select>
                 <button
                     type="submit"
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded hover:cursor-pointer"
                 >
                     Create Ride
                 </button>

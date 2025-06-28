@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import axios from '../api/axiosInstance.js'
+import { useNavigate } from 'react-router-dom'
 
 export default function Register(){
     const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ export default function Register(){
 		avatar: null,
 	})
     const [message, setMessage] = useState('')
+	const navigate = useNavigate()
 
     const handleChange = (e) => {
 		const { name, value } = e.target
@@ -58,16 +60,25 @@ export default function Register(){
 				<input name="fullName" type="text" placeholder="Full Name" value={formData.fullName} onChange={handleChange} className="w-full p-2 border rounded" required />
 				<input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} className="w-full p-2 border rounded" required />
 				<input name="password" type="password" placeholder="Password" value={formData.password} onChange={handleChange} className="w-full p-2 border rounded" required />
-				<select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 border rounded" required>
+				<select name="gender" value={formData.gender} onChange={handleChange} className="w-full p-2 border rounded hover:cursor-pointer" required>
 					<option value="">Select Gender</option>
 					<option value="Male">Male</option>
 					<option value="Female">Female</option>
 				</select>
 				<input name="contactNumber" type="text" placeholder="Contact Number" value={formData.contactNumber} onChange={handleChange} className="w-full p-2 border rounded" />
 				<input name="avatar" type="file" accept="image/*" onChange={handleFileChange} className="w-full" />
-				<button type="button" onClick={handleGeolocation} className="bg-blue-500 text-white px-4 py-2 rounded">Use My Location</button>
-				<button type="submit" className="bg-green-600 text-white px-4 py-2 rounded">Register</button>
+				<button type="button" onClick={handleGeolocation} className="bg-blue-500 text-white px-4 py-2 rounded hover:cursor-pointer">Use My Location</button>
+				<button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:cursor-pointer">Register</button>
 			</form>
+			<div className="text-center mt-4">
+                <span className="text-sm text-gray-600">Already have an account?</span>
+                <button
+                    onClick={() => navigate('/login')}
+                    className="ml-2 text-blue-600 hover:underline text-sm hover:cursor-pointer"
+                >
+                    Login
+                </button>
+            </div>
 		</div>
 	)
 }

@@ -51,7 +51,7 @@ export default function Login() {
                 />
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded hover:cursor-pointer"
                 >
                     Login
                 </button>
@@ -60,7 +60,7 @@ export default function Login() {
                 <span className="text-sm text-gray-600">Don't have an account?</span>
                 <button
                     onClick={() => navigate('/register')}
-                    className="ml-2 text-blue-600 hover:underline text-sm"
+                    className="ml-2 text-blue-600 hover:underline text-sm hover:cursor-pointer"
                 >
                     Sign up
                 </button>
