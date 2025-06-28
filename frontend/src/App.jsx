@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Register from './pages/Register.jsx'
 import Login from './pages/Login.jsx'
 import Home from './pages/Home.jsx'
+import MyRides from './pages/MyRides.jsx'
+import RideMatches from './pages/RideMatches.jsx'
 import MapNavigation from "./components/MapNavigation.jsx";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -14,6 +16,8 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
                 <Route path="/ride-form" element={<MapNavigation />} />
+                <Route path="/my-rides" element={<MyRides />} />
+                <Route path="/ride-matches" element={<RideMatches />} />
             </Routes>
         </Router>
     )

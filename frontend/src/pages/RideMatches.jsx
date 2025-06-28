@@ -14,7 +14,7 @@ export default function RideMatches() {
         const fetchMatches = async () => {
             try {
                 const res = await axios.post(
-                    '/rides/match',
+                    '/rides/matched',
                     { rideId },
                     { withCredentials: true }
                 )
