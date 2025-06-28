@@ -23,34 +23,50 @@ export default function MyRides() {
     }, [])
 
     return (
-        <div className="max-w-3xl mx-auto p-4">
-            <h2 className="text-2xl font-bold mb-4">My Rides</h2>
-            {loading && <p>Loading...</p>}
-            {message && <p className="text-red-500 mb-4">{message}</p>}
-            {!loading && rides.length === 0 && <p>You have not created any rides yet.</p>}
-            <ul className="space-y-4">
-                {rides.map((ride) => (
-                    <li key={ride._id} className="border rounded p-4">
-                        <p className="font-semibold">From: {ride.source}</p>
-                        <p className="font-semibold">To: {ride.destination}</p>
-                        <p className="text-sm text-gray-500">Date: {new Date(ride.datetime).toLocaleString()}</p>
-                        <p className="text-sm">Status: {ride.status}</p>
-                        <p className="text-sm">Gender Preference: {ride.genderPreference}</p>
+        <div className='bg-gradient-to-br from-blue-100 via-green-100 to-white'>
+            <div className="max-w-3xl mx-auto p-4">
+                <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">My Rides</h2>
+
+                {loading && <p className="text-center text-gray-600">Loading...</p>}
+                {message && <p className="text-center text-red-500 mb-4">{message}</p>}
+                {!loading && rides.length === 0 && (
+                    <p className="text-center text-gray-600">You have not created any rides yet.</p>
+                )}
+
+                <ul className="space-y-4">
+                    {rides.map((ride) => (
+                    <li
+                        key={ride._id}
+                        className="bg-blue-100 shadow-sd rounded-xl p-4 border hover:shadow-lg transition"
+                    >
+                        <p className="text-lg font-semibold text-gray-800">From: {ride.source}</p>
+                        <p className="text-lg font-semibold text-gray-800">To: {ride.destination}</p>
+                        <p className="text-sm text-gray-600">
+                            Date: {new Date(ride.datetime).toLocaleString()}
+                        </p>
+                        <p className="text-sm text-gray-600">Status: {ride.status}</p>
+                        <p className="text-sm text-gray-600">
+                            Gender Preference: {ride.genderPreference}
+                        </p>
                         <button
-                            className="mt-2 bg-blue-500 text-white py-1 px-3 rounded"
+                            className="mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded w-full sm:w-auto hover:cursor-pointer"
                             onClick={() => navigate('/ride-matches', { state: { rideId: ride._id } })}
-                        >
+                            >
                             View Matches
                         </button>
                     </li>
-                ))}
-            </ul>
-            <button
-                onClick={() => navigate(-1)}
-                className="mt-6 bg-gray-400 text-white py-2 px-4 rounded"
-            >
-                Back
-            </button>
+                    ))}
+                </ul>
+
+                <div className="flex justify-center mt-6">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="bg-gray-500 hover:bg-gray-600 text-white py-2 px-6 rounded hover:cursor-pointer"
+                        >
+                        Back
+                    </button>
+                </div>
+            </div>
         </div>
-    )
+    );
 } 
