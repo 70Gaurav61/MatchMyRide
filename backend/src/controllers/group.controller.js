@@ -1,4 +1,5 @@
 import { Group } from "../models/group.model.js";
+import { Message } from "../models/message.model.js";
 
 const isGroupAdmin = (group, userId) => {
     return group.admin.toString() === userId.toString();
@@ -386,6 +387,38 @@ const updateMemberStatus = async (req, res) => {
     }
 }
 
+// Get group chat history
+const getGroupMessages = async (req, res) => {
+    const { groupId } = req.params;
+    try {
+        const messages = await Message.find({ group: groupId })
+            .populate('sender', 'fullName avatar')
+            .sort({ createdAt: 1 });
+        res.status(200).json({ messages });
+    } catch (error) {
+        console.error("Error fetching group messages:", error);
+        res.status(500).json({ message: "Internal server error while fetching messages" });
+    }
+};
+
+// Socket.io event handler for sending a message
+// This is a placeholder for use in the Socket.io setup in index.js
+const handleSendMessage = async (io, socket, data) => {
+    // data: { groupId, content }
+    try {
+        const message = await Message.create({
+            group: data.groupId,
+            sender: socket.user._id,
+            content: data.content
+        });
+        const populatedMsg = await message.populate('sender', 'fullName avatar');
+        io.to(data.groupId).emit('newMessage', populatedMsg);
+    } catch (error) {
+        console.error("Error sending message:", error);
+        socket.emit('error', { message: 'Failed to send message' });
+    }
+};
+
 export {
     createNewGroup,
     deleteGroup,
@@ -397,5 +430,7 @@ export {
     rejectGroupJoinRequest,
     removeFromGroup,
     leaveGroup,
-    updateMemberStatus
+    updateMemberStatus,
+    getGroupMessages,
+    handleSendMessage
 }

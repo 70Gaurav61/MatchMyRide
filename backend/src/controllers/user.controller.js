@@ -55,7 +55,7 @@ const registerUser = async(req, res) => {
         fullName,
         gender,
         contactNumber,
-        avatar: avatar?.url || "http://localhost:8000/images/default_avatar.jpg",
+        avatar: avatar?.url || "http://localhost:3000/images/default_avatar.jpg",
         location: userLocation,
         password        
     })

@@ -11,7 +11,8 @@ import {
     rejectGroupJoinRequest,
     removeFromGroup,
     leaveGroup,
-    updateMemberStatus
+    updateMemberStatus,
+    getGroupMessages
 } from '../controllers/group.controller.js'
 
 const router = Router()
@@ -30,5 +31,7 @@ router.route("/reject-join-request").post(verifyJWT, rejectGroupJoinRequest)
 router.route("/remove").post(verifyJWT, removeFromGroup)
 router.route("/leave").post(verifyJWT, leaveGroup)
 router.route("/update-member-status").patch(verifyJWT, updateMemberStatus)
+
+router.route("/:groupId/messages").get(verifyJWT, getGroupMessages)
 
 export default router
