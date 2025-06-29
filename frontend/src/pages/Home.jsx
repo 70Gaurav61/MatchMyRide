@@ -71,6 +71,12 @@ export default function Home() {
                         View My Rides
                     </button>
                     <button
+                        onClick={() => navigate('/my-groups')}
+                        className="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md transition hover:cursor-pointer"
+                    >
+                        View My Groups
+                    </button>
+                    <button
                         onClick={handleLogout}
                         className="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md shadow-md transition hover:cursor-pointer"
                     >

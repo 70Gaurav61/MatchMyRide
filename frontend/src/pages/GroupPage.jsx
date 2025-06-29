@@ -50,7 +50,7 @@ export default function GroupPage() {
 		if (!groupId) return
 		const fetchGroup = async () => {
 			try {
-				const res = await axios.get(`/api/v1/groups/${groupId}`, {
+				const res = await axios.get(`/groups/${groupId}`, {
 					withCredentials: true,
 				})
 				setGroup(res.data.group)

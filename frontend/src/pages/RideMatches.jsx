@@ -47,7 +47,7 @@ export default function RideMatches() {
             const res = await axios.post(
                 '/groups/create', // check again the route
                 {
-                    name: 'My Ride Group',
+                    // name: 'My Ride Group',
                     rideId,
                     invites,
                 },
