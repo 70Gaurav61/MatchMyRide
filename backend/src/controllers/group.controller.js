@@ -412,7 +412,7 @@ const handleSendMessage = async (io, socket, data) => {
             content: data.content
         });
         const populatedMsg = await message.populate('sender', 'fullName avatar');
-        io.to(data.groupId).emit('newMessage', populatedMsg);
+        io.to(data.groupId).emit('receive-message', populatedMsg);
     } catch (error) {
         console.error("Error sending message:", error);
         socket.emit('error', { message: 'Failed to send message' });

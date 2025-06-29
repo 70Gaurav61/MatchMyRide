@@ -59,7 +59,21 @@ export default function GroupPage() {
 				setMessage('Failed to load group')
 			}
 		}
+
+		// Fetch group messages for the current group
+		const fetchMessages = async () => {
+			try {
+				const res = await axios.get(`/groups/${groupId}/messages`, {
+					withCredentials: true,
+				})
+				setMessages(res.data.messages || [])
+			} catch (err) {
+				console.error('Failed to fetch group messages', err)
+				setMessage('Failed to load group messages')
+			}
+		}
 		fetchGroup()
+		fetchMessages()
 	}, [groupId])
 
 	const handleSendMessage = () => {
@@ -130,7 +144,7 @@ export default function GroupPage() {
 			<div className="mb-4 border p-4 rounded h-64 overflow-y-auto bg-gray-100">
 				{messages.map((msg, idx) => (
 					<p key={idx} className="text-sm mb-1">
-						<strong>{msg.senderName}:</strong> {msg.content}
+						<strong>{msg.sender.fullName}:</strong> {msg.content}
 					</p>
 				))}
 				<div ref={bottomRef}></div>

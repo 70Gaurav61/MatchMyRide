@@ -68,19 +68,19 @@ connectDB()
         })
 
         // Join a group room
-        socket.on('joinGroup', (groupId) => {
+        socket.on('join-group', (groupId) => {
             socket.join(groupId);
             console.log(`Socket ${socket.id} joined group ${groupId}`);
         });
 
         // Leave a group room
-        socket.on('leaveGroup', (groupId) => {
+        socket.on('leave-group', (groupId) => {
             socket.leave(groupId);
             console.log(`Socket ${socket.id} left group ${groupId}`);
         });
 
         // Send a message
-        socket.on('sendMessage', (data) => {
+        socket.on('send-message', (data) => {
             handleSendMessage(io, socket, data);
         });
 
