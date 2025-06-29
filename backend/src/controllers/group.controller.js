@@ -419,6 +419,48 @@ const handleSendMessage = async (io, socket, data) => {
     }
 };
 
+const getUserGroups = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const groups = await Group.find({
+            $or: [
+                { admin: userId },
+                { 'members.user': userId }
+            ]
+        }).select('name');
+        return res.status(200).json({ groups });
+    } catch (error) {
+        console.error('Error fetching user groups:', error);
+        return res.status(500).json({ message: 'Internal server error while fetching user groups' });
+    }
+};
+
+const getGroupById = async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const group = await Group.findById(groupId)
+            .populate({
+                path: 'members.user',
+                select: 'fullName avatar'
+            })
+            .lean();
+        if (!group) {
+            return res.status(404).json({ message: 'Group not found' });
+        }
+
+        group.confirmedMembers = (group.members || []).map(m => ({
+            user: m.user._id,
+            fullName: m.user.fullName,
+            avatar: m.user.avatar,
+            ready: m.status === 'ready',
+        }));
+        return res.status(200).json({ group });
+    } catch (error) {
+        console.error('Error fetching group by id:', error);
+        return res.status(500).json({ message: 'Internal server error while fetching group' });
+    }
+};
+
 export {
     createNewGroup,
     deleteGroup,
@@ -432,5 +474,7 @@ export {
     leaveGroup,
     updateMemberStatus,
     getGroupMessages,
-    handleSendMessage
+    handleSendMessage,
+    getUserGroups,
+    getGroupById
 }
