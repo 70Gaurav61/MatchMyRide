@@ -7,7 +7,7 @@ import { User } from './models/user.model.js'
 import jwt from 'jsonwebtoken'
 import cookie from 'cookie'
 import { ApiError } from './utils/ApiError.js';
-import { handleSendMessage } from './controllers/group.controller.js';
+import { handleSendMessage, toggleReadyStatus, handleStartRideCountdown } from './controllers/group.controller.js';
 
 connectDB()
 .then(() => {
@@ -82,6 +82,16 @@ connectDB()
         // Send a message
         socket.on('send-message', (data) => {
             handleSendMessage(io, socket, data);
+        });
+
+        // Toggle ready status
+        socket.on('toggle-ready-status', (data) => {
+            toggleReadyStatus(io, socket, data);
+        });
+
+        // Start ride countdown
+        socket.on('start-ride', (data) => {
+            handleStartRideCountdown(io, socket, data);
         });
 
         socket.on('disconnect', () => {

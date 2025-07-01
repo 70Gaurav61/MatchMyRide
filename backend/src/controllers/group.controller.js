@@ -1,5 +1,6 @@
 import { Group } from "../models/group.model.js";
 import { Message } from "../models/message.model.js";
+import { Ride } from "../models/ride.model.js";
 
 const isGroupAdmin = (group, userId) => {
     return group.admin.toString() === userId.toString();
@@ -461,6 +462,110 @@ const getGroupById = async (req, res) => {
     }
 };
 
+// Toggle ready status for a group member and emit real-time update
+const toggleReadyStatus = async (io, socket, data) => {
+    // data: { groupId }
+    try {        
+        const group = await Group.findById(data.groupId).populate({
+            path: 'members.user',
+            select: 'fullName avatar'
+        });
+        if (!group) {
+            return socket.emit('error', { message: 'Group not found' });
+        }
+        // Find the member
+        const memberIndex = group.members.findIndex(m => m.user._id.toString() === socket.user._id.toString());
+        if (memberIndex === -1) {
+            return socket.emit('error', { message: 'You are not a member of this group' });
+        }
+        // Toggle status
+        group.members[memberIndex].status = group.members[memberIndex].status === 'ready' ? 'not ready' : 'ready';
+        await group.save();
+        // Prepare updated members info
+        const updatedMembers = group.members.map(m => ({
+            user: m.user._id,
+            fullName: m.user.fullName,
+            avatar: m.user.avatar,
+            ready: m.status === 'ready',
+        }));
+        // Emit to all group members
+        io.to(data.groupId).emit('group-ready-status-updated', {
+            groupId: data.groupId,
+            members: updatedMembers
+        });
+    } catch (error) {
+        console.error('Error toggling ready status:', error);
+        socket.emit('error', { message: 'Failed to toggle ready status' });
+    }
+};
+
+// Socket.io event handler for starting the ride countdown
+const handleStartRideCountdown = async (io, socket, data) => {
+    // data: { groupId }
+    try {
+        const group = await Group.findById(data.groupId).populate({
+            path: 'members.user',
+            select: 'fullName avatar'
+        });
+        if (!group) {
+            return socket.emit('error', { message: 'Group not found' });
+        }
+
+        if (group.admin.toString() !== socket.user._id.toString()) {
+            return socket.emit('error', { message: 'Only admin can start the ride' });
+        }
+
+        // Prevent multiple countdowns
+        if (group.status !== 'open') {
+            return socket.emit('error', { message: 'Ride has already been started or locked.' });
+        }
+
+        group.status = 'locked';
+        await group.save();
+
+        const endTime = Date.now() + 10000;
+        io.to(data.groupId).emit('countdown-started', { endTime });
+
+        await new Promise(resolve => setTimeout(resolve, 10000));
+
+        const freshGroup = await Group.findById(data.groupId).populate({
+            path: 'members.user',
+            select: 'fullName avatar'
+        });
+        if (!freshGroup) {
+            return socket.emit('error', { message: 'Group not found after countdown' });
+        }
+
+        const readyMembers = freshGroup.members.filter(m => m.status === 'ready');
+        // Remove not ready members
+        freshGroup.members = readyMembers;
+
+        for (const member of readyMembers) {
+            if (member.ride) {
+                await Ride.findByIdAndUpdate(member.ride, { status: 'Matched' });
+            }
+        }
+
+        freshGroup.status = 'closed';
+        await freshGroup.save();
+
+        const finalMembers = readyMembers.map(m => ({
+            user: m.user._id,
+            fullName: m.user.fullName,
+            avatar: m.user.avatar,
+            ready: m.status === 'ready',
+        }));
+
+        io.to(data.groupId).emit('ride-started', {
+            groupId: data.groupId,
+            members: finalMembers
+        });
+    } catch (error) {
+        console.error('Error in start ride countdown:', error);
+        socket.emit('error', { message: 'Failed to start ride countdown' });
+    }
+};
+
 export {
     createNewGroup,
     deleteGroup,
@@ -476,5 +581,7 @@ export {
     getGroupMessages,
     handleSendMessage,
     getUserGroups,
-    getGroupById
+    getGroupById,
+    toggleReadyStatus,
+    handleStartRideCountdown
 }
