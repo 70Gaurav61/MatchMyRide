@@ -14,6 +14,10 @@ export default function Home() {
                     withCredentials: true,
                 })
                 setUser(res.data.user)
+                // Store user in local storage
+                if (res.data.user) {
+                    localStorage.setItem('user', JSON.stringify(res.data.user));
+                }
             } catch (err) {
                 setMessage('Not authenticated')
                 navigate('/login')
