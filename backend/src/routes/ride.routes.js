@@ -6,7 +6,8 @@ import {
     updateRideTime,
     updateRideStatus,
     getUserRides,
-    getRideMatches
+    getRideMatches,
+    getRideDetails
  } from '../controllers/ride.controller.js';
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.patch('/update-time', verifyJWT, updateRideTime);
 router.patch('/update-status', verifyJWT, updateRideStatus);
 router.get('/user-rides', verifyJWT, getUserRides);
 router.post('/matched', verifyJWT, getRideMatches);
+router.get('/:rideId/details', verifyJWT, getRideDetails);
 
 export default router;
