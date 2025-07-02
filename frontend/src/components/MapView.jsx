@@ -6,7 +6,7 @@ mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const NEW_DELHI = [77.209, 28.6139];
 
-const MapView = ({ source, destination, route, onSourceChange, onDestinationChange }) => {
+const MapView = ({ source, destination, route, routes = [], onSourceChange, onDestinationChange }) => {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const sourceMarker = useRef(null);
@@ -95,28 +95,65 @@ const MapView = ({ source, destination, route, onSourceChange, onDestinationChan
         map.flyTo({ center: destination.coordinates, zoom: 14 });
       }
 
-      if (route && map.getSource("route")) {
-        map.getSource("route").setData(route);
-      } else if (route && !map.getSource("route")) {
-        map.addSource("route", {
-          type: "geojson",
-          data: route,
+      // Remove all previous route layers and sources
+      const existingLayers = map.getStyle().layers || [];
+      existingLayers.forEach((layer) => {
+        if (layer.id.startsWith("route-")) {
+          if (map.getLayer(layer.id)) map.removeLayer(layer.id);
+        }
+      });
+      const existingSources = Object.keys(map.getStyle().sources || {});
+      existingSources.forEach((sourceId) => {
+        if (sourceId.startsWith("route-")) {
+          if (map.getSource(sourceId)) map.removeSource(sourceId);
+        }
+      });
+
+      // Render multiple routes if provided
+      if (routes && routes.length > 0) {
+        routes.forEach((r, idx) => {
+          const sourceId = `route-${idx}`;
+          const layerId = `route-${idx}`;
+          if (!map.getSource(sourceId)) {
+            map.addSource(sourceId, {
+              type: "geojson",
+              data: r.geojson,
+            });
+          } else {
+            map.getSource(sourceId).setData(r.geojson);
+          }
+          if (!map.getLayer(layerId)) {
+            map.addLayer({
+              id: layerId,
+              type: "line",
+              source: sourceId,
+              layout: { "line-join": "round", "line-cap": "round" },
+              paint: { "line-color": r.color || "#2563eb", "line-width": 5, "line-opacity": r.opacity || 1 },
+            });
+          }
         });
-        map.addLayer({
-          id: "route",
-          type: "line",
-          source: "route",
-          layout: { "line-join": "round", "line-cap": "round" },
-          paint: { "line-color": "#2563eb", "line-width": 5 },
-        });
-      } else if (!route && map.getLayer("route")) {
-        map.removeLayer("route");
-        map.removeSource("route");
+      } else if (route) {
+        // Fallback: single route (legacy prop)
+        if (map.getSource("route")) {
+          map.getSource("route").setData(route);
+        } else {
+          map.addSource("route", {
+            type: "geojson",
+            data: route,
+          });
+          map.addLayer({
+            id: "route",
+            type: "line",
+            source: "route",
+            layout: { "line-join": "round", "line-cap": "round" },
+            paint: { "line-color": "#2563eb", "line-width": 5 },
+          });
+        }
       }
     });
 
     return () => {};
-  }, [source, destination, route]);
+  }, [source, destination, route, routes]);
 
   return (
     <div ref={mapContainer} className="w-full h-full min-h-screen rounded" />

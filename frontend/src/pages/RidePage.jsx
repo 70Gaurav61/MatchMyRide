@@ -3,6 +3,23 @@ import { useParams } from "react-router-dom";
 import MapView from "../components/MapView";
 import axiosInstance from "../api/axiosInstance";
 
+// Helper to find the closest point index in a LineString to a given coordinate
+function findClosestIndex(lineCoords, targetCoord) {
+  let minDist = Infinity;
+  let minIdx = 0;
+  for (let i = 0; i < lineCoords.length; i++) {
+    const [lng, lat] = lineCoords[i];
+    const d = Math.sqrt(
+      Math.pow(lng - targetCoord[0], 2) + Math.pow(lat - targetCoord[1], 2)
+    );
+    if (d < minDist) {
+      minDist = d;
+      minIdx = i;
+    }
+  }
+  return minIdx;
+}
+
 const RidePage = () => {
   const { rideId } = useParams();
   const [ride, setRide] = useState(null);
@@ -36,6 +53,32 @@ const RidePage = () => {
   const source = ride.sourceCoordinates ? { coordinates: ride.sourceCoordinates, place_name: ride.source } : null;
   const destination = ride.destinationCoordinates ? { coordinates: ride.destinationCoordinates, place_name: ride.destination } : null;
 
+  // Prepare routes for MapView
+  let routes = [];
+  if (route && route.geometry && route.geometry.coordinates && ride.sourceCoordinates && ride.destinationCoordinates) {
+    // Full group route (light color)
+    routes.push({ geojson: route, color: "#60a5fa", opacity: 0.5 });
+    // User segment (dark color)
+    const lineCoords = route.geometry.coordinates;
+    const userSrcIdx = findClosestIndex(lineCoords, ride.sourceCoordinates);
+    const userDestIdx = findClosestIndex(lineCoords, ride.destinationCoordinates);
+    const [startIdx, endIdx] = userSrcIdx < userDestIdx ? [userSrcIdx, userDestIdx] : [userDestIdx, userSrcIdx];
+    const userSegmentCoords = lineCoords.slice(startIdx, endIdx + 1);
+    if (userSegmentCoords.length > 1) {
+      routes.push({
+        geojson: {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: userSegmentCoords,
+          },
+        },
+        color: "#2563eb",
+        opacity: 1,
+      });
+    }
+  }
+
   return (
     <div className="flex flex-col md:flex-row h-screen w-full">
       {/* Left: Ride and group details */}
@@ -68,7 +111,7 @@ const RidePage = () => {
         <MapView
           source={source}
           destination={destination}
-          route={route}
+          routes={routes}
         />
       </div>
     </div>

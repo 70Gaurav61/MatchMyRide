@@ -98,9 +98,12 @@ const generateAccessAndRefreshToken = async(userId) => {
 }
 
 const secureCookieWithExpiry = {
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
+    // httpOnly: true, // deploy
+    // secure: true,
+    // sameSite: 'strict',
+    httpOnly: true, // dev phase
+    secure: false,         
+    sameSite: "Lax",       
     expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
 }
 
