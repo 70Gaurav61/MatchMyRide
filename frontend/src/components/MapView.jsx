@@ -156,7 +156,7 @@ const MapView = ({ source, destination, route, routes = [], onSourceChange, onDe
   }, [source, destination, route, routes]);
 
   return (
-    <div ref={mapContainer} className="w-full h-full min-h-screen rounded" />
+    <div ref={mapContainer} className="w-full h-full rounded" />
   );
 };
 

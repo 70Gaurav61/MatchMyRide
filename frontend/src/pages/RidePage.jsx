@@ -27,6 +27,15 @@ const RidePage = () => {
   const [route, setRoute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showDetails, setShowDetails] = useState(false); // For mobile details panel
+
+  // Helper to detect mobile view
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchRideDetails = async () => {
@@ -79,41 +88,99 @@ const RidePage = () => {
     }
   }
 
-  return (
-    <div className="flex flex-col md:flex-row h-screen w-full">
-      {/* Left: Ride and group details */}
-      <div className="w-full max-w-md p-6 bg-white border-r border-gray-200 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4">Ride Details</h2>
-        <div className="mb-4">
-          <div><span className="font-medium">Source:</span> {ride.source}</div>
-          <div><span className="font-medium">Destination:</span> {ride.destination}</div>
-          <div><span className="font-medium">Date & Time:</span> {new Date(ride.datetime).toLocaleString()}</div>
-          <div><span className="font-medium">Status:</span> {ride.status}</div>
-          <div><span className="font-medium">Gender Preference:</span> {ride.genderPreference}</div>
-        </div>
-        {group && (
-          <div className="mb-4">
-            <h3 className="font-semibold mb-2">Group Members</h3>
-            <ul>
-              {group.confirmedMembers?.map((member) => (
-                <li key={member.user} className="flex items-center gap-2 mb-1">
-                  {member.avatar && <img src={member.avatar} alt={member.fullName} className="w-6 h-6 rounded-full" />}
-                  <span>{member.fullName}</span>
-                  {member.ready && <span className="text-green-600 text-xs ml-2">Ready</span>}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+  // Details panel content
+  const detailsPanel = (
+    <div className="w-full max-w-md p-6 bg-white border-r border-gray-200 overflow-y-auto h-full md:h-auto">
+      <h2 className="text-2xl font-bold mb-4">Ride Details</h2>
+      <div className="mb-4">
+        <div><span className="font-medium">Source:</span> {ride.source}</div>
+        <div><span className="font-medium">Destination:</span> {ride.destination}</div>
+        <div><span className="font-medium">Date & Time:</span> {new Date(ride.datetime).toLocaleString()}</div>
+        <div><span className="font-medium">Status:</span> {ride.status}</div>
+        <div><span className="font-medium">Gender Preference:</span> {ride.genderPreference}</div>
       </div>
-      {/* Right: Map */}
-      <div className="flex-1 h-full">
+      {group && (
+        <div className="mb-4">
+          <h3 className="font-semibold mb-2">Group Members</h3>
+          <ul>
+            {group.confirmedMembers?.map((member) => (
+              <li key={member.user} className="flex items-center gap-2 mb-1">
+                {member.avatar && <img src={member.avatar} alt={member.fullName} className="w-6 h-6 rounded-full" />}
+                <span>{member.fullName}</span>
+                {member.ready && <span className="text-green-600 text-xs ml-2">Ready</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="relative h-screen w-full">
+      {/* Desktop: Side-by-side layout */}
+      <div className={`hidden md:flex flex-col md:flex-row h-screen w-full`}>
+        {/* Left: Ride and group details */}
+        {detailsPanel}
+        {/* Right: Map */}
+        <div className="flex-1 h-full">
+          <MapView
+            source={source}
+            destination={destination}
+            routes={routes}
+          />
+        </div>
+      </div>
+      {/* Mobile: Map full screen, floating button for details */}
+      <div className="md:hidden h-full w-full relative">
         <MapView
           source={source}
           destination={destination}
           routes={routes}
         />
+        {/* Floating button */}
+        <button
+          className="fixed bottom-6 right-6 z-20 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg focus:outline-none"
+          onClick={() => setShowDetails(true)}
+        >
+          Show Details
+        </button>
+        {/* Slide-up panel */}
+        {showDetails && (
+          <div className="fixed inset-0 z-30 flex items-end justify-center" style={{ pointerEvents: 'none' }}>
+            {/* Click-catcher for closing panel */}
+            <div
+              className="absolute inset-0"
+              style={{ pointerEvents: 'auto' }}
+              onClick={() => setShowDetails(false)}
+            />
+            <div
+              className="w-full max-w-md bg-white rounded-t-2xl p-6 shadow-lg animate-slideup"
+              style={{ maxHeight: '80vh', overflowY: 'auto', pointerEvents: 'auto', position: 'relative' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                className="absolute top-2 right-4 text-gray-500 text-2xl font-bold"
+                onClick={() => setShowDetails(false)}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              {detailsPanel}
+            </div>
+          </div>
+        )}
       </div>
+      {/* Slide-up animation */}
+      <style>{`
+        @keyframes slideup {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        .animate-slideup {
+          animation: slideup 0.3s cubic-bezier(0.4,0,0.2,1);
+        }
+      `}</style>
     </div>
   );
 };

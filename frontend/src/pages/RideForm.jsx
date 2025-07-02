@@ -133,11 +133,11 @@ const RideForm = () => {
   };
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex flex-col md:flex-row h-full md:h-screen w-full">
       {/* Left: Form */}
-      {message && <p className="text-red-500 mb-2">{message}</p>}
-      <div className="w-full h-full max-w-md p-6 bg-white border-r border-gray-200">
-        <h2 className="text-2xl font-bold mb-4 p-2">Create Ride</h2>
+      <div className="w-full md:max-w-md p-4 md:p-6 bg-white border-b md:border-b-0 md:border-r border-gray-200">
+        <h2 className="text-2xl font-bold mb-4 p-2 hidden md:block">Create Ride</h2>
+        {message && <p className="text-red-500 mb-2">{message}</p>}
         <form onSubmit={handleCreateRide}>
           <div className="flex items-center gap-2">
             <LocationInput
@@ -147,7 +147,7 @@ const RideForm = () => {
             />
             <button
               type="button"
-              className="bg-gray-200 px-2 py-1 rounded text-xs"
+              className="bg-gray-200 px-2 py-1 rounded text-xs whitespace-nowrap"
               onClick={handleUseCurrentLocation}
               disabled={locating}
             >
@@ -184,30 +184,32 @@ const RideForm = () => {
               <option value="Other">Other</option>
             </select>
           </div>
-          <button
-            type="button"
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 mr-2"
-            onClick={handleShowRoute}
-            disabled={!source || !destination || loading}
-          >
-            {loading ? "Loading..." : "Show Route"}
-          </button>
-          <button
-            type="submit"
-            className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
-            disabled={
-              !formData.source ||
-              !formData.destination ||
-              !formData.datetime ||
-              loading
-            }
-          >
-            Create Ride
-          </button>
+          <div className="flex flex-row gap-2 mt-4">
+            <button
+              type="button"
+              className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 w-full sm:w-auto"
+              onClick={handleShowRoute}
+              disabled={!source || !destination || loading}
+            >
+              {loading ? "Loading..." : "Show Route"}
+            </button>
+            <button
+              type="submit"
+              className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50 w-full sm:w-auto"
+              disabled={
+                !formData.source ||
+                !formData.destination ||
+                !formData.datetime ||
+                loading
+              }
+            >
+              Create Ride
+            </button>
+          </div>
         </form>
       </div>
       {/* Right: Map */}
-      <div className="flex h-full w-full">
+      <div className="flex h-[70vh] w-full min-w-0 md:h-full">
         <MapView
           source={source}
           destination={destination}
