@@ -36,69 +36,84 @@ const MapView = ({ source, destination, route, onSourceChange, onDestinationChan
     }
     const map = mapRef.current;
 
-    if (source && source.coordinates) {
-      if (!sourceMarker.current) {
-        sourceMarker.current = new mapboxgl.Marker({ draggable: true, color: "#2563eb" })
-          .setLngLat(source.coordinates)
-          .addTo(map);
-        sourceMarker.current.on("dragend", () => {
-          const lngLat = sourceMarker.current.getLngLat();
-          reverseGeocode(lngLat.lng, lngLat.lat, onSourceChange);
-        });
+    // Helper to run map operations after style is loaded
+    const runWhenStyleLoaded = (fn) => {
+      if (map.isStyleLoaded()) {
+        fn();
       } else {
-        sourceMarker.current.setLngLat(source.coordinates);
+        const onLoad = () => {
+          fn();
+          map.off('style.load', onLoad);
+        };
+        map.on('style.load', onLoad);
       }
-    } else if (sourceMarker.current) {
-      sourceMarker.current.remove();
-      sourceMarker.current = null;
-    }
+    };
 
-    if (destination && destination.coordinates) {
-      if (!destMarker.current) {
-        destMarker.current = new mapboxgl.Marker({ draggable: true, color: "#f59e42" })
-          .setLngLat(destination.coordinates)
-          .addTo(map);
-        destMarker.current.on("dragend", () => {
-          const lngLat = destMarker.current.getLngLat();
-          reverseGeocode(lngLat.lng, lngLat.lat, onDestinationChange);
+    runWhenStyleLoaded(() => {
+      if (source && source.coordinates) {
+        if (!sourceMarker.current) {
+          sourceMarker.current = new mapboxgl.Marker({ draggable: true, color: "#2563eb" })
+            .setLngLat(source.coordinates)
+            .addTo(map);
+          sourceMarker.current.on("dragend", () => {
+            const lngLat = sourceMarker.current.getLngLat();
+            reverseGeocode(lngLat.lng, lngLat.lat, onSourceChange);
+          });
+        } else {
+          sourceMarker.current.setLngLat(source.coordinates);
+        }
+      } else if (sourceMarker.current) {
+        sourceMarker.current.remove();
+        sourceMarker.current = null;
+      }
+
+      if (destination && destination.coordinates) {
+        if (!destMarker.current) {
+          destMarker.current = new mapboxgl.Marker({ draggable: true, color: "#f59e42" })
+            .setLngLat(destination.coordinates)
+            .addTo(map);
+          destMarker.current.on("dragend", () => {
+            const lngLat = destMarker.current.getLngLat();
+            reverseGeocode(lngLat.lng, lngLat.lat, onDestinationChange);
+          });
+        } else {
+          destMarker.current.setLngLat(destination.coordinates);
+        }
+      } else if (destMarker.current) {
+        destMarker.current.remove();
+        destMarker.current = null;
+      }
+
+      if (source && destination && source.coordinates && destination.coordinates) {
+        const bounds = new mapboxgl.LngLatBounds();
+        bounds.extend(source.coordinates);
+        bounds.extend(destination.coordinates);
+        map.fitBounds(bounds, { padding: 80 });
+      } else if (source && source.coordinates) {
+        map.flyTo({ center: source.coordinates, zoom: 14 });
+      } else if (destination && destination.coordinates) {
+        map.flyTo({ center: destination.coordinates, zoom: 14 });
+      }
+
+      if (route && map.getSource("route")) {
+        map.getSource("route").setData(route);
+      } else if (route && !map.getSource("route")) {
+        map.addSource("route", {
+          type: "geojson",
+          data: route,
         });
-      } else {
-        destMarker.current.setLngLat(destination.coordinates);
+        map.addLayer({
+          id: "route",
+          type: "line",
+          source: "route",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#2563eb", "line-width": 5 },
+        });
+      } else if (!route && map.getLayer("route")) {
+        map.removeLayer("route");
+        map.removeSource("route");
       }
-    } else if (destMarker.current) {
-      destMarker.current.remove();
-      destMarker.current = null;
-    }
-
-    if (source && destination && source.coordinates && destination.coordinates) {
-      const bounds = new mapboxgl.LngLatBounds();
-      bounds.extend(source.coordinates);
-      bounds.extend(destination.coordinates);
-      map.fitBounds(bounds, { padding: 80 });
-    } else if (source && source.coordinates) {
-      map.flyTo({ center: source.coordinates, zoom: 14 });
-    } else if (destination && destination.coordinates) {
-      map.flyTo({ center: destination.coordinates, zoom: 14 });
-    }
-
-    if (route && map.getSource("route")) {
-      map.getSource("route").setData(route);
-    } else if (route && !map.getSource("route")) {
-      map.addSource("route", {
-        type: "geojson",
-        data: route,
-      });
-      map.addLayer({
-        id: "route",
-        type: "line",
-        source: "route",
-        layout: { "line-join": "round", "line-cap": "round" },
-        paint: { "line-color": "#2563eb", "line-width": 5 },
-      });
-    } else if (!route && map.getLayer("route")) {
-      map.removeLayer("route");
-      map.removeSource("route");
-    }
+    });
 
     return () => {};
   }, [source, destination, route]);

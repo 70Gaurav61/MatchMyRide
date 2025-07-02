@@ -6,7 +6,8 @@ import MyRides from './pages/MyRides.jsx'
 import RideMatches from './pages/RideMatches.jsx'
 import GroupPage from './pages/GroupPage.jsx'
 import Groups from "./components/groups.jsx";
-import MapNavigation from "./components/MapNavigation.jsx";
+import RideForm from './pages/RideForm.jsx'
+import RidePage from './pages/RidePage';
 import "mapbox-gl/dist/mapbox-gl.css";
 
 
@@ -21,9 +22,10 @@ function App() {
 				<Route path="/my-groups" element={<Groups />} />
 				<Route path="/group" element={<GroupPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
-                <Route path="/ride-form" element={<MapNavigation />} />
+                <Route path="/ride-form" element={<RideForm />} />
                 <Route path="/my-rides" element={<MyRides />} />
                 <Route path="/ride-matches" element={<RideMatches />} />
+                <Route path="/ride/:rideId" element={<RidePage />} />
             </Routes>
         </Router>
     )

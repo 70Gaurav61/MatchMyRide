@@ -50,9 +50,15 @@ export default function MyRides() {
                         </p>
                         <button
                             className="mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded w-full sm:w-auto hover:cursor-pointer"
-                            onClick={() => navigate('/ride-matches', { state: { rideId: ride._id } })}
-                            >
-                            View Matches
+                            onClick={() => {
+                                if (ride.status === 'Matched') {
+                                    navigate(`/ride/${ride._id}`);
+                                } else {
+                                    navigate('/ride-matches', { state: { rideId: ride._id } });
+                                }
+                            }}
+                        >
+                            {ride.status === 'Matched' ? 'Go to Ride' : 'View Matches'}
                         </button>
                     </li>
                     ))}
