@@ -6,6 +6,23 @@ mapboxgl.accessToken = MAPBOX_TOKEN;
 
 const NEW_DELHI = [77.209, 28.6139];
 
+// Helper to calculate distance between two [lng, lat] points in meters
+function getDistanceMeters(coord1, coord2) {
+  if (!coord1 || !coord2) return Infinity;
+  const toRad = (v) => (v * Math.PI) / 180;
+  const R = 6371000; // Earth radius in meters
+  const [lng1, lat1] = coord1;
+  const [lng2, lat2] = coord2;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 const MapView = ({ source, destination, route, routes = [], onSourceChange, onDestinationChange, memberMarkers = [], liveLocation }) => {
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
@@ -14,6 +31,7 @@ const MapView = ({ source, destination, route, routes = [], onSourceChange, onDe
   const memberMarkerRefs = useRef([]);
   const liveLocationMarker = useRef(null);
   const [mapStyle, setMapStyle] = useState("mapbox://styles/mapbox/streets-v11");
+  const lastCenteredLocation = useRef(null);
 
   const reverseGeocode = async (lng, lat, cb) => {
     const res = await fetch(
@@ -92,15 +110,25 @@ const MapView = ({ source, destination, route, routes = [], onSourceChange, onDe
         destMarker.current = null;
       }
 
-      if (source && destination && source.coordinates && destination.coordinates) {
+      // Centering logic
+      if (liveLocation && liveLocation.coordinates) {
+        const shouldRecenter = getDistanceMeters(liveLocation.coordinates, lastCenteredLocation.current) > 20;
+        if (shouldRecenter) {
+          map.flyTo({ center: liveLocation.coordinates, zoom: 16 });
+          lastCenteredLocation.current = liveLocation.coordinates;
+        }
+      } else if (source && destination && source.coordinates && destination.coordinates) {
         const bounds = new mapboxgl.LngLatBounds();
         bounds.extend(source.coordinates);
         bounds.extend(destination.coordinates);
         map.fitBounds(bounds, { padding: 80 });
+        lastCenteredLocation.current = null;
       } else if (source && source.coordinates) {
         map.flyTo({ center: source.coordinates, zoom: 14 });
+        lastCenteredLocation.current = source.coordinates;
       } else if (destination && destination.coordinates) {
         map.flyTo({ center: destination.coordinates, zoom: 14 });
+        lastCenteredLocation.current = destination.coordinates;
       }
 
       // Remove all previous route layers and sources
@@ -291,15 +319,25 @@ const MapView = ({ source, destination, route, routes = [], onSourceChange, onDe
         destMarker.current = null;
       }
 
-      if (source && destination && source.coordinates && destination.coordinates) {
+      // Centering logic
+      if (liveLocation && liveLocation.coordinates) {
+        const shouldRecenter = getDistanceMeters(liveLocation.coordinates, lastCenteredLocation.current) > 20;
+        if (shouldRecenter) {
+          map.flyTo({ center: liveLocation.coordinates, zoom: 16 });
+          lastCenteredLocation.current = liveLocation.coordinates;
+        }
+      } else if (source && destination && source.coordinates && destination.coordinates) {
         const bounds = new mapboxgl.LngLatBounds();
         bounds.extend(source.coordinates);
         bounds.extend(destination.coordinates);
         map.fitBounds(bounds, { padding: 80 });
+        lastCenteredLocation.current = null;
       } else if (source && source.coordinates) {
         map.flyTo({ center: source.coordinates, zoom: 14 });
+        lastCenteredLocation.current = source.coordinates;
       } else if (destination && destination.coordinates) {
         map.flyTo({ center: destination.coordinates, zoom: 14 });
+        lastCenteredLocation.current = destination.coordinates;
       }
 
       // Remove all previous route layers and sources
