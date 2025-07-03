@@ -4,7 +4,8 @@ import io from 'socket.io-client'
 import axios from '../api/axiosInstance'
 
 let socket
-
+// Implement share live location feature later as -
+// emit it as a message with type: 'live-location' and handle it
 export default function GroupPage() {
 	const location = useLocation()
 	const navigate = useNavigate()
@@ -26,9 +27,11 @@ export default function GroupPage() {
 		if (!groupId) return setMessage('Group ID missing')
 
 		// Connect to WebSocket server
-		socket = io('http://localhost:3000', {
-			withCredentials: true,
-		})
+		// socket = io('http://localhost:3000', {
+		// 	withCredentials: true,
+		// })
+
+		socket = io(); // ngrok dev
 
 		socket.emit('join-group', groupId)
 
@@ -79,7 +82,6 @@ export default function GroupPage() {
 					withCredentials: true,
 				})
 				setGroup(res.data.group)
-				setMessages(res.data.group.messages || [])
 				// Set isReady for the current user based on group data
 				const user = JSON.parse(localStorage.getItem('user'));
 				if (user && res.data.group && res.data.group.confirmedMembers) {
