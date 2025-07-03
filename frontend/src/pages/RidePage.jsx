@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import MapView from "../components/MapView";
 import axiosInstance from "../api/axiosInstance";
@@ -28,6 +28,8 @@ const RidePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showDetails, setShowDetails] = useState(false); // For mobile details panel
+  const [liveLocation, setLiveLocation] = useState(null);
+  const watchIdRef = useRef(null);
 
   // Helper to detect mobile view
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -53,6 +55,54 @@ const RidePage = () => {
     };
     fetchRideDetails();
   }, [rideId]);
+
+  // Extract group member markers
+  let memberMarkers = [];
+  if (group && group.confirmedMembers && group.members) {
+    // Map userId to avatar
+    const userIdToAvatar = {};
+    group.confirmedMembers.forEach(m => {
+      userIdToAvatar[m.user] = m.avatar;
+    });
+    // For each group member, get their ride's sourceLocation
+    group.members.forEach(m => {
+      if (m.ride && m.ride.sourceLocation && m.ride.sourceLocation.coordinates) {
+        memberMarkers.push({
+          coordinates: m.ride.sourceLocation.coordinates,
+          avatar: userIdToAvatar[m.user?._id || m.user],
+          fullName: m.user?.fullName || '',
+        });
+      }
+    });
+  }
+
+  // Live navigation handler
+  const handleStartNavigation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser');
+      return;
+    }
+    if (watchIdRef.current !== null) return; // Already tracking
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        setLiveLocation({
+          coordinates: [pos.coords.longitude, pos.coords.latitude],
+        });
+      },
+      (err) => {
+        alert('Unable to retrieve your location');
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 20000 }
+    );
+  };
+  // Stop tracking on unmount
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, []);
 
   if (loading) return <div className="p-8">Loading...</div>;
   if (error) return <div className="p-8 text-red-500">{error}</div>;
@@ -128,22 +178,42 @@ const RidePage = () => {
             source={source}
             destination={destination}
             routes={routes}
+            memberMarkers={memberMarkers}
+            liveLocation={liveLocation}
           />
         </div>
+        {/* Start Navigation Button */}
+        <button
+          className="fixed bottom-8 right-8 z-30 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg text-lg font-semibold hover:bg-green-700 transition"
+          onClick={handleStartNavigation}
+          style={{ minWidth: 120 }}
+        >
+          Start
+        </button>
       </div>
-      {/* Mobile: Map full screen, floating button for details */}
+      {/* Mobile: Map full screen, floating button for details and navigation */}
       <div className="md:hidden h-full w-full relative">
         <MapView
           source={source}
           destination={destination}
           routes={routes}
+          memberMarkers={memberMarkers}
+          liveLocation={liveLocation}
         />
-        {/* Floating button */}
+        {/* Floating button for details */}
         <button
-          className="fixed bottom-6 right-6 z-20 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg focus:outline-none"
+          className="fixed bottom-20 right-6 z-20 bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg focus:outline-none"
           onClick={() => setShowDetails(true)}
         >
           Show Details
+        </button>
+        {/* Start Navigation Button */}
+        <button
+          className="fixed bottom-6 right-6 z-30 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg text-lg font-semibold hover:bg-green-700 transition"
+          onClick={handleStartNavigation}
+          style={{ minWidth: 120 }}
+        >
+          Start
         </button>
         {/* Slide-up panel */}
         {showDetails && (
