@@ -27,6 +27,18 @@ const createNewGroup = async (req, res) => {
         if (!group) {
             return res.status(500).json({ message: "Failed to create group" });
         }
+
+        // Emit socket.io event for all invited users (if socket.io is available)
+        if (req.io) {
+            for (const invite of group.invites) {
+                req.io.to(invite.user.toString()).emit('group-invited', {
+                    groupId: group._id,
+                    groupName: group.name,
+                    admin: req.user.fullName,
+                    ride: invite.ride
+                });
+            }
+        }
     
         return res.status(200).json({
             group,
@@ -89,6 +101,16 @@ const inviteInGroup = async (req, res) => {
         });
 
         await group.save();
+
+        // Emit real-time invite notification
+        if (req.io) {            
+            req.io.to(userId.toString()).emit('group-invite', {
+                groupId: group._id,
+                groupName: group.name,
+                admin: req.user.fullName,
+                ride: rideId
+            });
+        }
 
         return res.status(200).json({
             message: "User invited successfully",
@@ -566,6 +588,39 @@ const handleStartRideCountdown = async (io, socket, data) => {
     }
 };
 
+// Get all group invites for the current user
+const getUserInvites = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        // Find groups where invites.user matches current user
+        const groups = await Group.find({
+            'invites.user': userId
+        })
+        .populate('invites.ride', 'name')
+        .populate('admin', 'fullName')
+        .select('name invites admin');
+
+        // Filter invites to only those for the current user
+        const invites = [];
+        for (const group of groups) {
+            for (const invite of group.invites) {
+                if (invite.user.toString() === userId.toString()) {
+                    invites.push({
+                        groupId: group._id,
+                        groupName: group.name,
+                        admin: group.admin,
+                        ride: invite.ride,
+                    });
+                }
+            }
+        }
+        return res.status(200).json({ invites });
+    } catch (error) {
+        console.error('Error fetching user invites:', error);
+        return res.status(500).json({ message: 'Internal server error while fetching invites' });
+    }
+};
+
 export {
     createNewGroup,
     deleteGroup,
@@ -583,5 +638,6 @@ export {
     getUserGroups,
     getGroupById,
     toggleReadyStatus,
-    handleStartRideCountdown
+    handleStartRideCountdown,
+    getUserInvites
 }

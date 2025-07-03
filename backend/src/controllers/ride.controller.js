@@ -177,9 +177,8 @@ export const getRideDetails = async (req, res) => {
       
     try {
       route = await getRouteGeoJSON(waypoints);
-      console.log("Route", route);
     } catch (e) {
-      console.log("Error", e);
+      console.log("Error while route finding", e);
       route = null;
     }
 

@@ -14,7 +14,8 @@ import {
     updateMemberStatus,
     getGroupMessages,
     getUserGroups,
-    getGroupById
+    getGroupById,
+    getUserInvites
 } from '../controllers/group.controller.js'
 
 const router = Router()
@@ -36,6 +37,7 @@ router.route("/update-member-status").patch(verifyJWT, updateMemberStatus)
 
 router.route("/:groupId/messages").get(verifyJWT, getGroupMessages)
 router.route('/my-groups').get(verifyJWT, getUserGroups)
+router.route('/my-invites').get(verifyJWT, getUserInvites)
 router.route('/:groupId').get(verifyJWT, getGroupById)
 
 export default router
