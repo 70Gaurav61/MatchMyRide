@@ -40,6 +40,17 @@ const rideSchema = new mongoose.Schema({
       required: true,
     },
   },
+  route: {
+    type: {
+      type: String,
+      enum: ['LineString'],
+      default: 'LineString'
+    },
+    coordinates: {
+      type: [[Number]], // Array of [lng, lat]
+      required: false
+    }
+  },
   genderPreference: {
     type: String,
     enum: ['Any', 'Male', 'Female'],
@@ -54,5 +65,6 @@ const rideSchema = new mongoose.Schema({
 
 rideSchema.index({ sourceLocation: '2dsphere' });
 rideSchema.index({ destinationLocation: '2dsphere' });
+rideSchema.index({ route: '2dsphere' });
 
 export const Ride = mongoose.model('Ride', rideSchema);
