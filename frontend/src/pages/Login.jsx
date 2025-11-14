@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useUser } from '../context/UserContext'
 import axios from '../api/axiosInstance.js'
 
 export default function Login() {
@@ -9,6 +10,13 @@ export default function Login() {
     })
     const [message, setMessage] = useState('')
     const navigate = useNavigate()
+    const { isAuthenticated, loading, login } = useUser()
+
+    useEffect(() => {
+        if (!loading && isAuthenticated) {
+            navigate('/', { replace: true })
+        }
+    }, [isAuthenticated, loading, navigate])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -19,6 +27,9 @@ export default function Login() {
         e.preventDefault()
         try {
             const res = await axios.post('/users/login', formData)
+
+            login(res.data.user)
+            
             setMessage(res.data.message)
             navigate('/') // Redirect to homepage on success
         } catch (err) {

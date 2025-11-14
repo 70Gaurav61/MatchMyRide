@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import axios from '../api/axiosInstance.js'
 import { useNavigate } from 'react-router-dom'
+import { useUser } from '../context/UserContext'
 
 export default function Register(){
     const [formData, setFormData] = useState({
@@ -14,6 +15,13 @@ export default function Register(){
 	})
     const [message, setMessage] = useState('')
 	const navigate = useNavigate()
+	const { isAuthenticated, loading } = useUser()
+
+	useEffect(() => {
+		if (!loading && isAuthenticated) {
+			navigate('/', { replace: true })
+		}
+	}, [isAuthenticated, loading, navigate])
 
     const handleChange = (e) => {
 		const { name, value } = e.target

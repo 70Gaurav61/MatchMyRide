@@ -1,46 +1,19 @@
-import { useEffect, useState } from 'react'
-import axios from '../api/axiosInstance.js'
+import { useUser } from '../context/UserContext'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {
-    const [user, setUser] = useState(null)
-    const [message, setMessage] = useState('')
+    const { user, logout } = useUser()
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const res = await axios.get('/users/me', {
-                    withCredentials: true,
-                })
-                setUser(res.data.user)
-                // Store user in local storage
-                if (res.data.user) {
-                    localStorage.setItem('user', JSON.stringify(res.data.user));
-                }
-            } catch (err) {
-                setMessage('Not authenticated')
-                navigate('/login')
-            }
-        }
-        fetchUser()
-    }, [navigate])
-
     const handleLogout = async () => {
-        try {
-            await axios.post('/users/logout', {}, { withCredentials: true })
-            navigate('/login')
-        } catch (err) {
-            setMessage(err.response?.data?.message || 'Logout failed')
-        }
+        await logout()
+        navigate('/login')
     }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center px-4">
             <div className="w-full max-w-2xl bg-white shadow-xl rounded-2xl p-8">
                 <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">Welcome to RideShare</h1>
-
-                {message && <p className="text-red-500 mb-4 text-center">{message}</p>}
 
                 {user && (
                     <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 text-center sm:text-left">
@@ -90,5 +63,4 @@ export default function Home() {
             </div>
         </div>
     )
-
 }
