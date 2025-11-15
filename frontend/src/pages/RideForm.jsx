@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import LocationInput from "../components/LocationInput";
-import MapView from "../components/MapView";
+import LocationInput from "../components/mapbox/LocationInput";
+import MapView from "../components/mapbox/MapView";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 

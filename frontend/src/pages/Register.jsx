@@ -10,7 +10,6 @@ export default function Register(){
 		password: '',
 		gender: '',
 		contactNumber: '',
-		location: [0, 0],
 		avatar: null,
 	})
     const [message, setMessage] = useState('')
@@ -30,15 +29,6 @@ export default function Register(){
 
     const handleFileChange = (e) => {
 		setFormData({ ...formData, avatar: e.target.files[0] })
-	}
-
-    const handleGeolocation = () => {
-		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition((pos) => {
-				const { latitude, longitude } = pos.coords
-				setFormData({ ...formData, location: [longitude, latitude] })
-			})
-		}
 	}
 
     const handleSubmit = async (e) => {
@@ -116,24 +106,29 @@ export default function Register(){
 						onChange={handleChange}
 						className="w-full p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
 					/>
-					<input
-						name="avatar"
-						type="file"
-						accept="image/*"
-						onChange={handleFileChange}
-						className="w-full text-sm hover:cursor-pointer"
-					/>
-					<div className="flex justify-between gap-2">
-						<button
-							type="button"
-							onClick={handleGeolocation}
-							className="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition duration-200 hover:cursor-pointer"
-						>
-							Use My Location
-						</button>
+					<div className="flex gap-3">
+						<div className="flex-1 border-2 border-none rounded-xl  text-center bg-gray-50 hover:bg-gray-100 transition overflow-hidden">
+							<input
+								name="avatar"
+								type="file"
+								accept="image/*"
+								onChange={handleFileChange}
+								className="hidden"
+								id="avatar-input"
+							/>
+							<label htmlFor="avatar-input" className="cursor-pointer">
+								<button
+									type="button"
+									onClick={() => document.getElementById('avatar-input').click()}
+									className="w-full bg-blue-500 text-white py-3 px-4 rounded-lg hover:bg-blue-600 transition duration-200"
+								>
+									{formData.avatar ? formData.avatar.name : 'Choose Avatar'}
+								</button>
+							</label>
+						</div>
 						<button
 							type="submit"
-							className="w-1/2 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-200 hover:cursor-pointer"
+							className="flex-1 bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition duration-200 hover:cursor-pointer"
 						>
 							Register
 						</button>

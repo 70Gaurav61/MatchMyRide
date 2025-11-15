@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import MapView from "../components/MapView";
+import MapView from "../components/mapbox/MapView";
 import axiosInstance from "../api/axiosInstance";
 
 // Helper to find the closest point index in a LineString to a given coordinate
