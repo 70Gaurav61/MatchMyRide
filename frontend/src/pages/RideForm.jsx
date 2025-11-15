@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import LocationInput from "../components/mapbox/LocationInput";
 import MapView from "../components/mapbox/MapView";
+import { fetchRoute } from "../components/mapbox/mapUtils";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
-
-const MAPBOX_TOKEN = import.meta.env.VITE_REACT_APP_MAPBOX_API_KEY;
 
 const RideForm = () => {
   const [source, setSource] = useState(null);
@@ -20,7 +19,6 @@ const RideForm = () => {
     destinationCoordinates: [0, 0],
   });
   const [message, setMessage] = useState('');
-  const [locating, setLocating] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,19 +32,11 @@ const RideForm = () => {
     if (!source?.coordinates || !destination?.coordinates) return;
     setLoading(true);
     try {
-      const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${source.coordinates[0]},${source.coordinates[1]};${destination.coordinates[0]},${destination.coordinates[1]}?geometries=geojson&access_token=${MAPBOX_TOKEN}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      if (data.routes && data.routes[0]) {
+      const feature = await fetchRoute([source.coordinates, destination.coordinates]);
+      if (feature.geometry) {
         setRoute({
           type: "FeatureCollection",
-          features: [
-            {
-              type: "Feature",
-              geometry: data.routes[0].geometry,
-              properties: {},
-            },
-          ],
+          features: [feature],
         });
       } else {
         setRoute(null);
@@ -81,46 +71,6 @@ const RideForm = () => {
     }));
   };
 
-  const handleUseCurrentLocation = async () => {
-    if (!navigator.geolocation) {
-      setMessage('Geolocation is not supported by your browser');
-      return;
-    }
-    setLocating(true);
-    setMessage('');
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const { latitude, longitude } = position.coords;
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}`
-        );
-        const data = await res.json();
-        const place = data.features && data.features[0];
-        if (place) {
-          const val = {
-            place_name: place.place_name,
-            coordinates: [longitude, latitude],
-          };
-          setSource(val);
-          setFormData((prev) => ({
-            ...prev,
-            source: val.place_name,
-            sourceCoordinates: val.coordinates,
-          }));
-        } else {
-          setMessage('Could not determine your address');
-        }
-      } catch (err) {
-        setMessage('Failed to get location');
-      } finally {
-        setLocating(false);
-      }
-    }, (err) => {
-      setMessage('Permission denied or unavailable');
-      setLocating(false);
-    });
-  };
-
   const handleCreateRide = async (e) => {
     try {
       e.preventDefault();
@@ -139,25 +89,17 @@ const RideForm = () => {
         <h2 className="text-2xl font-bold mb-4 p-2 hidden md:block">Create Ride</h2>
         {message && <p className="text-red-500 mb-2">{message}</p>}
         <form onSubmit={handleCreateRide}>
-          <div className="flex items-center gap-2">
-            <LocationInput
-              label="Source"
-              value={source}
-              onChange={handleSourceChange}
-            />
-            <button
-              type="button"
-              className="bg-gray-200 px-2 py-1 rounded text-xs whitespace-nowrap"
-              onClick={handleUseCurrentLocation}
-              disabled={locating}
-            >
-              {locating ? 'Locating...' : 'Use Current Location'}
-            </button>
-          </div>
+          <LocationInput
+            label="Source"
+            value={source}
+            onChange={handleSourceChange}
+          />
+
           <LocationInput
             label="Destination"
             value={destination}
             onChange={handleDestinationChange}
+            showCurrentLocationBtn={false}
           />
           <div className="mt-4">
             <label className="block mb-1 font-medium">Date & Time</label>
