@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import LocationInput from "../components/mapbox/LocationInput";
-import MapView from "../components/mapbox/MapView";
+// import MapView from "../components/mapbox/MapView";
+import MapView from "../components/mapbox/MapView_new";
 import { fetchRoute } from "../components/mapbox/mapUtils";
 import axiosInstance from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -34,10 +35,7 @@ const RideForm = () => {
     try {
       const feature = await fetchRoute([source.coordinates, destination.coordinates]);
       if (feature.geometry) {
-        setRoute({
-          type: "FeatureCollection",
-          features: [feature],
-        });
+        setRoute(feature);
       } else {
         setRoute(null);
       }
@@ -153,11 +151,35 @@ const RideForm = () => {
       {/* Right: Map */}
       <div className="flex h-[70vh] w-full min-w-0 md:h-full">
         <MapView
-          source={source}
-          destination={destination}
-          route={route}
-          onSourceChange={handleSourceChange}
-          onDestinationChange={handleDestinationChange}
+          // source={source} // markers props
+          // destination={destination} // markers props
+          // route={route} // route prop
+          // onSourceChange={handleSourceChange} // markers change handlers
+          // onDestinationChange={handleDestinationChange} // markers change handlers
+          markers={[{
+            coordinates: source?.coordinates,
+            label: source?.place_name,
+            color: '#0000ff',
+            draggable: true,
+            onDragEnd: (geocoded) => handleSourceChange({
+              place_name: geocoded?.place_name || source.place_name,
+              coordinates: geocoded?.coordinates || source.coordinates,
+            }),
+          },{
+            coordinates: destination?.coordinates,
+            label: destination?.place_name,
+            color: '#ff0000',
+            draggable: true,
+            onDragEnd: (geocoded) => handleDestinationChange({
+              place_name: geocoded?.place_name || destination.place_name,
+              coordinates: geocoded?.coordinates || destination.coordinates,
+            }),
+          }]}
+          routes={[
+            {
+              geojson: route,
+            }
+          ]}
         />
       </div>
     </div>
