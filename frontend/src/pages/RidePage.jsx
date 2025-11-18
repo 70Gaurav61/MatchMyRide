@@ -58,18 +58,13 @@ const RidePage = () => {
 
   // Extract group member markers
   let memberMarkers = [];
-  if (group && group.confirmedMembers && group.members) {
-    // Map userId to avatar
-    const userIdToAvatar = {};
-    group.confirmedMembers.forEach(m => {
-      userIdToAvatar[m.user] = m.avatar;
-    });
+  if (group && group.members) {
     // For each group member, get their ride's sourceLocation
     group.members.forEach(m => {
       if (m.ride && m.ride.sourceLocation && m.ride.sourceLocation.coordinates) {
         memberMarkers.push({
           coordinates: m.ride.sourceLocation.coordinates,
-          avatar: userIdToAvatar[m.user?._id || m.user],
+          avatar: m.user?.avatar,
           fullName: m.user?.fullName || '',
         });
       }
@@ -153,11 +148,11 @@ const RidePage = () => {
         <div className="mb-4">
           <h3 className="font-semibold mb-2">Group Members</h3>
           <ul>
-            {group.confirmedMembers?.map((member) => (
-              <li key={member.user} className="flex items-center gap-2 mb-1">
-                {member.avatar && <img src={member.avatar} alt={member.fullName} className="w-6 h-6 rounded-full" />}
-                <span>{member.fullName}</span>
-                {member.ready && <span className="text-green-600 text-xs ml-2">Ready</span>}
+            {group.members?.map((member) => (
+              <li key={member.user._id} className="flex items-center gap-2 mb-1">
+                {member.user.avatar && <img src={member.user.avatar} alt={member.user.fullName} className="w-6 h-6 rounded-full" />}
+                <span>{member.user.fullName}</span>
+                {member.isReady && <span className="text-green-600 text-xs ml-2">Ready</span>}
               </li>
             ))}
           </ul>
