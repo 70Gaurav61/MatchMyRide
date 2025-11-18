@@ -145,7 +145,6 @@ const acceptInvite = async (req, res) => {
         group.members.push({
             user: invite.user,
             ride: invite.ride,
-            status: "not ready"
         });
         await group.save();
         return res.status(200).json({
@@ -267,7 +266,6 @@ const acceptGroupJoinRequest = async (req, res) => {
         group.members.push({
             user: request.user,
             ride: request.ride,
-            status: "not ready"
         });
         await group.save();
 
@@ -382,8 +380,8 @@ const leaveGroup = async (req, res) => {
     }
 }
 
-const updateMemberStatus = async (req, res) => {
-    const { groupId, userId, status } = req.body;
+const toggleMemberReadyStatus = async (req, res) => {
+    const { groupId, userId } = req.body;
 
     try {
         const group = await Group.findById(groupId);
@@ -398,15 +396,15 @@ const updateMemberStatus = async (req, res) => {
             return res.status(400).json({ message: "User is not a member of this group" });
         }
 
-        group.members[memberIndex].status = status;
+        group.members[memberIndex].isReady = !group.members[memberIndex].isReady;
         await group.save();
         return res.status(200).json({
-            message: "Member status updated successfully",
+            message: "Member ready status toggled successfully",
             group
         });
     } catch (error) {
-        console.error("Error updating member status:", error);
-        return res.status(500).json({ message: "Internal server error while updating member status" });
+        console.error("Error toggling member ready status:", error);
+        return res.status(500).json({ message: "Internal server error while updating member ready status" });
     }
 }
 
@@ -466,17 +464,17 @@ const getGroupById = async (req, res) => {
                 path: 'members.user',
                 select: 'fullName avatar'
             })
+            .populate('admin', 'fullName avatar')
+            .populate({
+                path: 'members.ride'
+                
+            })
             .lean();
         if (!group) {
             return res.status(404).json({ message: 'Group not found' });
         }
 
-        group.confirmedMembers = (group.members || []).map(m => ({
-            user: m.user._id,
-            fullName: m.user.fullName,
-            avatar: m.user.avatar,
-            ready: m.status === 'ready',
-        }));
+        
         return res.status(200).json({ group });
     } catch (error) {
         console.error('Error fetching group by id:', error);
@@ -501,14 +499,14 @@ const toggleReadyStatus = async (io, socket, data) => {
             return socket.emit('error', { message: 'You are not a member of this group' });
         }
         // Toggle status
-        group.members[memberIndex].status = group.members[memberIndex].status === 'ready' ? 'not ready' : 'ready';
+        group.members[memberIndex].isReady = !group.members[memberIndex].isReady;
         await group.save();
         // Prepare updated members info
         const updatedMembers = group.members.map(m => ({
             user: m.user._id,
             fullName: m.user.fullName,
             avatar: m.user.avatar,
-            ready: m.status === 'ready',
+            isReady: m.isReady,
         }));
         // Emit to all group members
         io.to(data.groupId).emit('group-ready-status-updated', {
@@ -558,7 +556,7 @@ const handleStartRideCountdown = async (io, socket, data) => {
             return socket.emit('error', { message: 'Group not found after countdown' });
         }
 
-        const readyMembers = freshGroup.members.filter(m => m.status === 'ready');
+        const readyMembers = freshGroup.members.filter(m => m.isReady === true);
         // Remove not ready members
         freshGroup.members = readyMembers;
 
@@ -575,7 +573,7 @@ const handleStartRideCountdown = async (io, socket, data) => {
             user: m.user._id,
             fullName: m.user.fullName,
             avatar: m.user.avatar,
-            ready: m.status === 'ready',
+            isReady: m.isReady,
         }));
 
         io.to(data.groupId).emit('ride-started', {
@@ -632,7 +630,7 @@ export {
     rejectGroupJoinRequest,
     removeFromGroup,
     leaveGroup,
-    updateMemberStatus,
+    toggleMemberReadyStatus,
     getGroupMessages,
     handleSendMessage,
     getUserGroups,

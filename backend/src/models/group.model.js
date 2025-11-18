@@ -52,10 +52,9 @@ const groupSchema = new Schema(
                     ref: "Ride",
                     required: true
                 },
-                status: {
-                    type: String,
-                    enum: ["not ready", "ready"],
-                    default: "not ready"
+                isReady: {
+                    type: Boolean,
+                    default: false
                 }
             }
         ],

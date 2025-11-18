@@ -11,7 +11,7 @@ import {
     rejectGroupJoinRequest,
     removeFromGroup,
     leaveGroup,
-    updateMemberStatus,
+    toggleMemberReadyStatus,
     getGroupMessages,
     getUserGroups,
     getGroupById,
@@ -33,7 +33,7 @@ router.route("/reject-join-request").post(verifyJWT, rejectGroupJoinRequest)
 
 router.route("/remove").post(verifyJWT, removeFromGroup)
 router.route("/leave").post(verifyJWT, leaveGroup)
-router.route("/update-member-status").patch(verifyJWT, updateMemberStatus)
+router.route("/toggle-ready").patch(verifyJWT, toggleMemberReadyStatus)
 
 router.route("/:groupId/messages").get(verifyJWT, getGroupMessages)
 router.route('/my-groups').get(verifyJWT, getUserGroups)
