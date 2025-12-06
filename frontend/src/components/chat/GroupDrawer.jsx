@@ -102,7 +102,7 @@ export default function GroupDrawer({ group, currentUser, isOpen, onClose, onAcc
                                         </p>
                                     </div>
                                 </div>
-                                {rideDetails.sourceLocation && (
+                                {/* {rideDetails.sourceLocation && (
                                     <div>
                                         <label className="text-xs text-gray-500 font-medium">Pickup Coordinates</label>
                                         <p className="text-xs text-gray-600 font-mono">
@@ -117,7 +117,7 @@ export default function GroupDrawer({ group, currentUser, isOpen, onClose, onAcc
                                             {rideDetails.destinationLocation.coordinates[1].toFixed(6)}, {rideDetails.destinationLocation.coordinates[0].toFixed(6)}
                                         </p>
                                     </div>
-                                )}
+                                )} */}
                             </div>
                         </section>
                     )}
@@ -141,7 +141,14 @@ export default function GroupDrawer({ group, currentUser, isOpen, onClose, onAcc
                                     >
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow">
-                                                {member.user.fullName?.charAt(0).toUpperCase() || '?'}
+                                                {member.user?.avatar ? (
+                                                <img
+                                                    src={member.user.avatar} alt={member.user.fullName} className="w-full h-full rounded-full object-cover" />
+                                                ) : (
+                                                    <>
+                                                        {member.user.fullName?.charAt(0).toUpperCase() || '?'}
+                                                    </>
+                                                )}
                                             </div>
                                             <div>
                                                 <p className="text-sm font-medium text-gray-800 flex items-center gap-1">

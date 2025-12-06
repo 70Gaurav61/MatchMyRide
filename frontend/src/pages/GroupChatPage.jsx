@@ -187,15 +187,15 @@ export default function GroupChatPage() {
     // Handle ready toggle
     const handleReadyClick = () => {
         toggleReadyStatus(groupId);
-        setGroup((prev) => {
-                if (!prev) return prev;
-                return {
-                    ...prev,
-                    members: prev.members.map(member => {
-                        return currentUser && member.user._id === currentUser._id ? { ...member, isReady: !member.isReady } : member;
-                    })
-                };
-            });
+        // setGroup((prev) => {
+        //         if (!prev) return prev;
+        //         return {
+        //             ...prev,
+        //             members: prev.members.map(member => {
+        //                 return currentUser && member.user._id === currentUser._id ? { ...member, isReady: !member.isReady } : member;
+        //             })
+        //         };
+        //     });
     };
 
     // Handle start ride

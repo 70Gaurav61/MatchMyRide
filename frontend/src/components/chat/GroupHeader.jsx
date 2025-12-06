@@ -53,14 +53,6 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
         navigate('/ride-map', { state: { groupId: group._id, group, rideDetails } });
     };
 
-    const getOnlineMembersCount = () => {
-        // For now, return random count. In future, track via socket
-        if (!members.length) return 0;
-        return Math.floor(Math.random() * members.length) + 1;
-    };
-
-    const simulatedOnlineCount = getOnlineMembersCount();
-
     return (
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
             {/* Top Section - Back Button, Group Name, Options */}
@@ -153,7 +145,7 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                 </div>
             </div>
 
-            {/* Ride Details Section */}
+            {/* Ride Details Section
             {rideDetails && (
                 <div className="px-4 py-3 space-y-2 border-b border-white/20">
                     <div className="flex items-center gap-2 text-sm">
@@ -173,7 +165,7 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Members Avatars & Show on Map Button */}
             <div className="px-4 py-3 flex items-center justify-between gap-3">
@@ -185,12 +177,20 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                             const displayInitial = memberUser.fullName?.charAt(0).toUpperCase() || '?';
                             return (
                                 <div key={member._id || memberUser._id || idx} className="relative flex-shrink-0">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold text-sm border-2 border-white">
-                                        {displayInitial}
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-semibold text-sm border-2 border-white overflow-hidden">
+                                        {memberUser.avatar ? (
+                                            <img
+                                                src={memberUser.avatar} alt={memberUser.fullName} className="w-full h-full rounded-full object-cover" />
+                                        ) : (
+                                            displayInitial
+                                        )}
                                     </div>
-                                    {/* Online indicator - random for now */}
-                                    {idx < simulatedOnlineCount && (
+                                    {/* Ready status indicator */}
+                                    {member.isReady && (
                                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                                    )}
+                                    {!member.isReady && (
+                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-yellow-400 rounded-full border-2 border-white"></div>
                                     )}
                                 </div>
                             );
@@ -222,7 +222,7 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
 
                 {/* Show on Map Button */}
                 <button
-                    onClick={onStart}
+                    onClick={handleShowOnMap}
                     className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                 >
                     <MapPin size={16} />
@@ -230,13 +230,13 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                 </button>
 
                 {/* Start Button */}
-                <button
-                    onClick={handleShowOnMap}
-                    // disabled={group.status !== 'open'}
+                {(isAdmin && <button
+                    onClick={onStart}
+                    disabled={group.status !== 'open'}
                     className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
                 >
                     {group.status === 'open' ? 'Start' : 'In Progress'}
-                </button>
+                </button>)}
             </div>
         </div>
     );

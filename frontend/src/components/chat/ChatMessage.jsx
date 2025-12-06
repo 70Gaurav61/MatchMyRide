@@ -36,7 +36,14 @@ export default function ChatMessage({ message, currentUser, isLastInGroup }) {
             {!isOwnMessage && (
                 <div className={`flex-shrink-0 ${isLastInGroup ? '' : 'invisible'}`}>
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-md">
-                        {message.sender.fullName?.charAt(0).toUpperCase() || '?'}
+                        {message.sender?.avatar ? (
+                            <img
+                                src={message.sender.avatar} alt={message.sender.fullName} className="w-full h-full rounded-full object-cover" />
+                            ) : (
+                                <>
+                                    {message.sender.fullName?.charAt(0).toUpperCase() || '?'}
+                                </> 
+                        )}
                     </div>
                 </div>
             )}
