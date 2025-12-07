@@ -485,7 +485,6 @@ const getGroupById = async (req, res) => {
             return res.status(404).json({ message: 'Group not found' });
         }
 
-        triggerRouteOptimization(group._id);
         return res.status(200).json({ group });
     } catch (error) {
         console.error('Error fetching group by id:', error);
@@ -554,10 +553,10 @@ const handleStartRideCountdown = async (io, socket, data) => {
         group.status = 'locked';
         await group.save();
 
-        const endTime = Date.now() + 10000;
+        const endTime = Date.now() + 30000;
         io.to(data.groupId).emit('countdown-started', { endTime });
 
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, 30000));
 
         const freshGroup = await Group.findById(data.groupId).populate({
             path: 'members.user',

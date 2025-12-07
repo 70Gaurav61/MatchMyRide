@@ -1,11 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, MoreVertical, Users, Clock, Calendar, Crown } from 'lucide-react';
+import { ArrowLeft, MapPin, MoreVertical, Users, Clock, Calendar, Crown, Timer } from 'lucide-react';
 
-export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady, onStart, onShowGroupInfo }) {
+export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady, onStart, onShowGroupInfo, countdownEndTime }) {
     
     const navigate = useNavigate();
     const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+    const [countdown, setCountdown] = useState(null);
+
+    // Countdown timer effect
+    useEffect(() => {
+        if (!countdownEndTime) {
+            setCountdown(null);
+            return;
+        }
+
+        const updateCountdown = () => {
+            const remaining = Math.max(0, Math.ceil((countdownEndTime - Date.now()) / 1000));
+            setCountdown(remaining);
+            
+            if (remaining === 0) {
+                setCountdown(null);
+            }
+        };
+
+        updateCountdown();
+        const interval = setInterval(updateCountdown, 100);
+
+        return () => clearInterval(interval);
+    }, [countdownEndTime]);
 
     if (!group) return null;
 
@@ -14,8 +37,6 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
     const isAdmin = Boolean(currentUser?._id && adminId && adminId === currentUser._id);
     
     
-    // Get current user's ride for details
-    const rideDetails = members.length > 0 ? members.find(member => member.user?._id === currentUser?._id)?.ride : null;
     const isReady = members.some(member => member.user?._id === currentUser?._id && member.isReady === true);
 
     const formatDateTime = (datetime) => {
@@ -49,9 +70,12 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
     };
 
     const handleShowOnMap = () => {
-        // Navigate to map view page (to be implemented)
-        navigate('/ride-map', { state: { groupId: group._id, group, rideDetails } });
+        navigate('/ride-map', { state: { groupId: group._id, group, currentUser } });
     };
+
+    const handleShowNavigation = () => {
+        navigate('/navigation', { state: { groupId: group._id, group, currentUser } });
+    }
 
     return (
         <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
@@ -211,14 +235,14 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                 </div>
 
                 {/* Toggle Ready Button */}
-                
-                <button
-                    onClick={onReady}
-                    disabled={group.status !== 'open'}
-                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
-                >
-                    {isReady ? 'Mark Not Ready' : 'Mark Ready'}
-                </button>
+                {group.status !== 'closed' && (
+                    <button
+                        onClick={onReady}
+                        className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                    >
+                        {isReady ? 'Mark Not Ready' : 'Mark Ready'}
+                    </button>
+                )}
 
                 {/* Show on Map Button */}
                 <button
@@ -229,14 +253,45 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                     Show on Map
                 </button>
 
-                {/* Start Button */}
-                {(isAdmin && <button
-                    onClick={onStart}
-                    disabled={group.status !== 'open'}
-                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                {/* Show Common Route Button */}
+                <button
+                    onClick={handleShowNavigation}
+                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                 >
-                    {group.status === 'open' ? 'Start' : 'In Progress'}
-                </button>)}
+                    <MapPin size={16} />
+                    Navigation
+                </button>
+
+                {/* Start Button / Countdown / Status */}
+                {countdown !== null ? (
+                    <div className="bg-yellow-400/90 text-gray-900 px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 whitespace-nowrap animate-pulse">
+                        <Timer size={16} />
+                        Starting in {countdown}s
+                    </div>
+                ) : group.status === 'open' ? (
+                    <button
+                        onClick={onStart}
+                        disabled={!isAdmin}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap ${
+                            isAdmin 
+                                ? 'bg-green-500 hover:bg-green-600 cursor-pointer text-white' 
+                                : 'bg-white/10 cursor-not-allowed text-white/50'
+                        }`}
+                        title={!isAdmin ? 'Only admin can start the ride' : 'Start the ride countdown'}
+                    >
+                        {isAdmin ? 'Start Ride' : 'Waiting for Admin'}
+                    </button>
+                ) : group.status === 'locked' ? (
+                    <div className="bg-orange-500/90 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+                        <Clock size={16} />
+                        Locked
+                    </div>
+                ) : (
+                    <div className="bg-red-500/90 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 whitespace-nowrap">
+                        <Clock size={16} />
+                        Closed
+                    </div>
+                )}
             </div>
         </div>
     );

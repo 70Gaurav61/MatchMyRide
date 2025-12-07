@@ -395,10 +395,20 @@ const MapView = ({
         if (!markerData || !markerData.coordinates) return;
         const markerId = markerData.id || `marker-${Math.random()}`;
         
-        const marker = new mapboxgl.Marker({ 
-          draggable: markerData.draggable || false,
-          color: markerData.color || '#ff0000'
-        })
+        // Support custom marker elements
+        const markerOptions = {
+          draggable: markerData.draggable || false
+        };
+        
+        if (markerData.element) {
+          // Use custom element if provided
+          markerOptions.element = markerData.element;
+        } else {
+          // Use default color
+          markerOptions.color = markerData.color || '#ff0000';
+        }
+        
+        const marker = new mapboxgl.Marker(markerOptions)
           .setLngLat(markerData.coordinates);
 
         if (markerData.label) {

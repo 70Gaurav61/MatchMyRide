@@ -36,6 +36,7 @@ export default function GroupChatPage() {
     const [typingUsers, setTypingUsers] = useState([]);
     const [showNewMessageIndicator, setShowNewMessageIndicator] = useState(false);
     const [isAtBottom, setIsAtBottom] = useState(true);
+    const [countdownEndTime, setCountdownEndTime] = useState(null);
 
     // Refs
     const messagesEndRef = useRef(null);
@@ -119,11 +120,37 @@ export default function GroupChatPage() {
             }, 3000);
         };
 
+        const handleCountdownStarted = (data) => {
+            console.log('Countdown started:', data);
+            setCountdownEndTime(data.endTime);
+        };
+
+        const handleRideStarted = (data) => {
+            console.log('Ride started:', data);
+            setCountdownEndTime(null);
+            // Refresh page to update group status
+            window.location.reload();
+        };
+
+        const handleUserRemoved = (data) => {
+            console.log('User removed:', data);
+            if (data.userId === currentUser?._id) {
+                alert('You were removed from the group because you were not ready.');
+                navigate('/');
+            } else {
+                // Refresh to show updated member list
+                window.location.reload();
+            }
+        };
+
         // Register event listeners
         on('receive-message', handleReceiveMessage);
         on('group-update', handleGroupUpdate);
         on('group-ready-status-updated', handleReadyStatusUpdate);
         on('user-typing', handleUserTyping);
+        on('countdown-started', handleCountdownStarted);
+        on('ride-started', handleRideStarted);
+        on('user-removed', handleUserRemoved);
 
         // Cleanup
         return () => {
@@ -134,6 +161,9 @@ export default function GroupChatPage() {
             off('group-update', handleGroupUpdate);
             off('group-ready-status-updated', handleReadyStatusUpdate);
             off('user-typing', handleUserTyping);
+            off('countdown-started', handleCountdownStarted);
+            off('ride-started', handleRideStarted);
+            off('user-removed', handleUserRemoved);
         };
     }, [groupId, isConnected]);
 
@@ -299,6 +329,7 @@ export default function GroupChatPage() {
                 onReady={handleReadyClick}
                 onStart={handleStartClick}
                 onShowGroupInfo={() => setIsDrawerOpen(true)}
+                countdownEndTime={countdownEndTime}
             />
 
             {/* Chat Messages Area */}
