@@ -62,6 +62,38 @@ const groupSchema = new Schema(
             type: String,
             enum: ["open", "closed", "locked"],
             default: "open"
+        },
+        route: {
+            waypointOrder: [
+                {
+                    userId: {
+                        type: Schema.Types.ObjectId,
+                        ref: "User",
+                    },
+                    fullName: {
+                        type: String,
+                    },
+                    avatar: {
+                        type: String,
+                    },
+                    type: {
+                        type: String,
+                        enum: ["pickup", "drop"],
+                    },
+                    location:{ 
+                        type: [Number],
+                        default: undefined
+                    }, // [longitude, latitude]
+                }
+            ],
+            orderedCoordinates: { 
+                type: [[Number]],
+                default: []
+            }, 
+            directions: {
+                type: Schema.Types.Mixed,
+                default: {}
+            }
         }
     },
     {

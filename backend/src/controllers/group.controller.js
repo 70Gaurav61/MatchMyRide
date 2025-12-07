@@ -1,6 +1,7 @@
 import { Group } from "../models/group.model.js";
 import { Message } from "../models/message.model.js";
 import { Ride } from "../models/ride.model.js";
+import { generateOptimizedRoute } from "../utils/mapbox.js"
 
 const isGroupAdmin = (group, userId) => {
     return group.admin.toString() === userId.toString();
@@ -40,6 +41,7 @@ const createNewGroup = async (req, res) => {
             }
         }
     
+        triggerRouteOptimization(group._id);
         return res.status(200).json({
             group,
             message: "Group created successfully",
@@ -147,6 +149,8 @@ const acceptInvite = async (req, res) => {
             ride: invite.ride,
         });
         await group.save();
+
+        triggerRouteOptimization(group._id);
         return res.status(200).json({
             message: "Invite accepted successfully",
             group
@@ -269,6 +273,8 @@ const acceptGroupJoinRequest = async (req, res) => {
         });
         await group.save();
 
+        triggerRouteOptimization(group._id);
+
         return res.status(200).json({
             message: "Join request accepted successfully",
             group
@@ -343,6 +349,8 @@ const removeFromGroup = async (req, res) => {
         group.members.splice(memberIndex, 1);
         await group.save();
 
+        triggerRouteOptimization(group._id);
+
         return res.status(200).json({
             message: "User removed from group successfully",
             group
@@ -370,6 +378,9 @@ const leaveGroup = async (req, res) => {
         }
         group.members.splice(memberIndex, 1);
         await group.save();
+
+        triggerRouteOptimization(group._id);
+
         return res.status(200).json({
             message: "You have left the group successfully",
             group
@@ -474,7 +485,7 @@ const getGroupById = async (req, res) => {
             return res.status(404).json({ message: 'Group not found' });
         }
 
-        
+        triggerRouteOptimization(group._id);
         return res.status(200).json({ group });
     } catch (error) {
         console.error('Error fetching group by id:', error);
@@ -619,6 +630,26 @@ const getUserInvites = async (req, res) => {
     }
 };
 
+const triggerRouteOptimization = async (groupId) => {
+
+    const group = await Group.findById(groupId)
+        .populate({
+            path: 'members.user',
+            select: 'fullName avatar'
+        })
+        .populate({
+            path: 'members.ride'
+        })
+        .lean();
+    if (!group) {
+        return res.status(404).json({ message: 'Group not found' });
+    }
+
+    const route = await generateOptimizedRoute(group.members);
+    
+    await Group.findByIdAndUpdate(groupId, { route: route }, { new: true });
+}
+
 export {
     createNewGroup,
     deleteGroup,
@@ -637,5 +668,6 @@ export {
     getGroupById,
     toggleReadyStatus,
     handleStartRideCountdown,
-    getUserInvites
+    getUserInvites,
+    triggerRouteOptimization
 }
