@@ -74,7 +74,7 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
     };
 
     const handleShowNavigation = () => {
-        navigate('/navigation', { state: { groupId: group._id, group, currentUser } });
+        navigate('/navigation', { state: { groupId: group._id, group } });
     }
 
     return (
@@ -254,13 +254,14 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                 </button>
 
                 {/* Show Common Route Button */}
-                <button
-                    onClick={handleShowNavigation}
-                    className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
-                >
-                    <MapPin size={16} />
-                    Navigation
-                </button>
+                {group.status === 'closed' && ( 
+                    <button 
+                        onClick={handleShowNavigation}
+                        className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                    >
+                        <MapPin size={16} />
+                        Navigation
+                    </button>)}
 
                 {/* Start Button / Countdown / Status */}
                 {countdown !== null ? (
