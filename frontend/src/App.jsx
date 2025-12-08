@@ -12,7 +12,6 @@ import Groups from "./components/groups.jsx";
 import RideForm from './pages/RideForm.jsx'
 import RideMap from './pages/RideMap.jsx';
 import Navigation from './pages/Navigation.jsx';
-import RidePage from './pages/RidePage';
 import "mapbox-gl/dist/mapbox-gl.css";
 import InviteOverlay from './components/InviteOverlay.jsx'
 
@@ -31,7 +30,6 @@ function App() {
                         <Route path="/ride-matches" element={<ProtectedRoute><RideMatches /></ProtectedRoute>} />
                         <Route path="/my-groups" element={<ProtectedRoute><Groups /></ProtectedRoute>} />
                         <Route path="/group" element={<ProtectedRoute><GroupChatPage /></ProtectedRoute>} />
-                        <Route path="/ride/:rideId" element={<ProtectedRoute><RidePage /></ProtectedRoute>} />
                         <Route path="/ride-map" element={<ProtectedRoute><RideMap /></ProtectedRoute>} />
                         <Route path="/navigation" element={<ProtectedRoute><Navigation /></ProtectedRoute>} />
                         <Route path="*" element={<Navigate to="/" replace />} />

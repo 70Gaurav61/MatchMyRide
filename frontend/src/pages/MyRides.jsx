@@ -50,9 +50,11 @@ export default function MyRides() {
                         </p>
                         <button
                             className="mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded w-full sm:w-auto hover:cursor-pointer"
-                            onClick={() => {
+                            onClick={async() => {
                                 if (ride.status === 'Matched') {
-                                    navigate(`/ride/${ride._id}`);
+                                    const res = await axios.get(`/rides/group/${ride._id}`);
+
+                                    navigate(`/navigation`, { state: { groupId: res.data?.group?._id, group: res.data?.group } });
                                 } else {
                                     navigate('/ride-matches', { state: { rideId: ride._id } });
                                 }

@@ -231,64 +231,28 @@ export const getUserRides = async (req, res) => {
   }
 }
 
-export const getRideDetails = async (req, res) => {
+export const getRideGroup = async (req, res) => {
   try {
     const { rideId } = req.params;
-    const ride = await Ride.findById(rideId);
-    if (!ride) return res.status(404).json({ message: 'Ride not found' });
 
-    const group = await Group.findOne({ 'members.ride': rideId, 'status': 'closed' })
-      .populate({ path: 'members.user', select: 'fullName avatar' })
-      .populate({ path: 'members.ride' })
+    const group = await Group.findOne({ 'members.ride': rideId, status: 'closed' })
+      .populate({
+          path: 'members.user',
+          select: 'fullName avatar'
+      })
+      .populate('admin', 'fullName avatar')
+      .populate({
+          path: 'members.ride'
+      })
       .lean();
-    if (!group) return res.status(404).json({ message: 'Group not found for this ride' });
 
-    group.confirmedMembers = (group.members || []).map(m => ({
-      user: m.user._id,
-      fullName: m.user.fullName,
-      avatar: m.user.avatar,
-      ready: m.status === 'ready',
-    }));
-
-    const sources = group.members
-      .map(m => m.ride?.sourceLocation?.coordinates)
-      .filter(Boolean)
-
-    const destinations = group.members
-      .map(m => m.ride?.destinationLocation?.coordinates)
-      .filter(Boolean)
-      
-      let waypoints = [];
-      if (sources.length && destinations.length) {
-        waypoints = [...sources, ...destinations];
-      } else {
-        waypoints = [ride.sourceLocation.coordinates.slice().reverse(), ride.destinationLocation.coordinates.slice().reverse()];
-      }
-      let route = null;
-      
-    try {
-      route = await getRouteGeoJSON(waypoints);
-    } catch (e) {
-      console.log("Error while route finding", e);
-      route = null;
+    if (!group) {
+      return res.status(404).json({ message: 'Matching Group not found for this ride' });
     }
 
-    res.status(200).json({
-      ride: {
-        _id: ride._id,
-        source: ride.source,
-        destination: ride.destination,
-        datetime: ride.datetime,
-        status: ride.status,
-        genderPreference: ride.genderPreference,
-        sourceCoordinates: ride.sourceLocation.coordinates,
-        destinationCoordinates: ride.destinationLocation.coordinates,
-      },
-      group,
-      route,
-    });
+    res.status(200).json({ group, message: 'Group fetched successfully' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error while fetching ride details' });
+    res.status(500).json({ message: 'Server error while fetching ride group' });
   }
-};
+}
