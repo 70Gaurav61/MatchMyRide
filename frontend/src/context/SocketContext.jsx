@@ -19,7 +19,15 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         // Create socket connection
-        const newSocket = io();
+        const socketUrl = import.meta.env.VITE_APP_API_URL ? import.meta.env.VITE_APP_API_URL.replace('/api/v1', '') : 'http://localhost:3000';
+
+        const newSocket = io(socketUrl, {
+            withCredentials: true,
+            reconnection: true,
+            reconnectionDelay: 1000,
+            reconnectionAttempts: 10,
+            transports: ['websocket', 'polling']
+        });
         socketRef.current = newSocket;
         setSocket(newSocket);
 

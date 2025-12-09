@@ -13,11 +13,19 @@ connectDB()
 .then(() => {
     const port = process.env.PORT || 8000
     const server = createServer(app)
+
+    const allowedOrigins = process.env.CORS_ORIGIN 
+        ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+        : ['http://localhost:5173'];
+
     const io = new SocketIOServer(server, {
         cors: {
-            origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+            origin: allowedOrigins,
             credentials: true
-        }
+        },
+        pingTimeout: 60000, 
+        pingInterval: 25000,
+        transports: ['websocket', 'polling']
     });
 
     // Socket.IO middleware for authentication

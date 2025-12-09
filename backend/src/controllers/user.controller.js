@@ -98,13 +98,10 @@ const generateAccessAndRefreshToken = async(userId) => {
 }
 
 const secureCookieWithExpiry = {
-    // httpOnly: true, // deploy
-    // secure: true,
-    // sameSite: 'strict',
-    httpOnly: true, // dev phase
-    secure: false,         
-    sameSite: "Lax",       
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
+    httpOnly: true, // deploy
+    secure: true,
+    sameSite: 'none',
+    expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 }
 
 const loginUser = async(req, res) => {
@@ -164,7 +161,7 @@ const logoutUser = async(req, res) => {
     const secureCookie = {
         httpOnly: true,
         secure: true,
-        sameSite: 'strict',
+        sameSite: 'none',
     }
 
     return res
