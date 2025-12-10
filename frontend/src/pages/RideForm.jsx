@@ -83,7 +83,7 @@ const RideForm = () => {
   return (
     <div className="flex flex-col md:flex-row h-full md:h-screen w-full">
       {/* Left: Form */}
-      <div className="w-full md:max-w-md p-4 md:p-6 bg-white border-b md:border-b-0 md:border-r border-gray-200">
+      <div className="w-full md:max-w-md p-4 md:p-6 bg-background border-b md:border-b-0 md:border-r border-gray-200">
         <h2 className="text-2xl font-bold mb-4 p-2 hidden md:block">Create Ride</h2>
         {message && <p className="text-red-500 mb-2">{message}</p>}
         <form onSubmit={handleCreateRide}>
@@ -127,7 +127,7 @@ const RideForm = () => {
           <div className="flex flex-row gap-2 mt-4">
             <button
               type="button"
-              className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 w-full sm:w-auto"
+              className="bg-primary/80 hover:bg-primary text-primary-fg px-4 py-2 rounded disabled:opacity-50 w-full sm:w-auto disabled:cursor-not-allowed cursor-pointer"
               onClick={handleShowRoute}
               disabled={!source || !destination || loading}
             >
@@ -135,7 +135,7 @@ const RideForm = () => {
             </button>
             <button
               type="submit"
-              className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50 w-full sm:w-auto"
+              className="bg-primary/80 hover:bg-primary text-primary-fg px-4 py-2 rounded disabled:opacity-50 w-full sm:w-auto disabled:cursor-not-allowed cursor-pointer"
               disabled={
                 !formData.source ||
                 !formData.destination ||

@@ -1,5 +1,83 @@
 @import "tailwindcss";
 
+@theme {
+  /* This exposes the variables as classes: bg-primary, text-surface, etc. */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-fg: var(--secondary-fg);
+  
+  --color-muted: var(--muted);
+  --color-content: var(--content)
+  --color-border: var(--border);
+  --color-error: var(--error);
+  --color-success: var(--success);
+}
+
+/* 2. DEFINE THE VALUES (The "Electric Transit" Palette) */
+:root {
+  /* --- Light Mode (Day) --- */
+  --background: #F8FAFC;      /* Off-white bg */
+  --surface: #FFFFFF;         /* Pure white cards */
+  
+  --primary: #2563EB;         /* Electric Royal Blue */
+  --primary-fg: #FFFFFF;      /* White text on blue buttons */
+  
+  --secondary: #06B6D4;       /* Cyan */
+  --secondary-fg: #FFFFFF;
+  
+  --muted: #3e454f;           /* Grey text */
+  --content: #0b0b0b;
+  --border: #E2E8F0;          /* Light grey borders */
+  
+  --error: #EF4444;
+  --success: #10B981;
+}
+
+/* --- Dark Mode (OLED Night) --- */
+/* If you use 'class' strategy for dark mode, keep this class selector. 
+   If you rely on system settings only, change .dark to @media (prefers-color-scheme: dark) */
+.dark {
+  --background: #000000;      /* PITCH BLACK for OLED battery saving */
+  --surface: #121212;         /* Dark Grey for cards */
+  
+  --primary: #60A5FA;         /* Lighter Blue (Better visibility on black) */
+  --primary-fg: #0F172A;      /* Dark text on light blue buttons */
+  
+  --secondary: #22D3EE;       /* Neon Cyan */
+  --secondary-fg: #0F172A;
+  
+  --muted: #94A3B8;           /* Light Grey */
+  --content: #f0f0f0;
+  --border: #333333;          /* Crucial: Visible border for black-on-black contrast */
+  
+  --error: #F87171;
+  --success: #34D399;
+}
+
+/* 3. BASE STYLES */
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--color-on-background, #0F172A); /* Default text color */
+  }
+  
+  /* Fix text color in Dark Mode */
+  .dark body {
+    color: #F1F5F9;
+  }
+}
+
+/* Default styles to apply the theme to the body */
+body {
+  background-color: rgb(var(--bg-main));
+  color: rgb(var(--text-main));
+}
+
 /* Custom scrollbar styles */
 .scrollbar-hide {
   -ms-overflow-style: none;  /* IE and Edge */
