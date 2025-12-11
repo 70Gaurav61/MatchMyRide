@@ -459,7 +459,8 @@ const getUserGroups = async (req, res) => {
                 { admin: userId },
                 { 'members.user': userId }
             ]
-        }).select('name');
+        }).select("-route");
+        // optionally attach last message
         return res.status(200).json({ groups });
     } catch (error) {
         console.error('Error fetching user groups:', error);
