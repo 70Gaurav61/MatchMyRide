@@ -6,8 +6,6 @@ import Register from './pages/Register.jsx'
 import Login from './pages/Login.jsx'
 import Home from './pages/Home.jsx'
 import MyRides from './pages/MyRides.jsx'
-import RideMatches from './pages/RideMatches.jsx'
-import GroupChatPage from './pages/GroupChatPage.jsx' 
 import MyGroups from "./pages/MyGroups.jsx"
 import RideForm from './pages/RideForm.jsx'
 import RideMap from './pages/RideMap.jsx';
@@ -27,9 +25,7 @@ function App() {
                         <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                         <Route path="/ride-form" element={<ProtectedRoute><RideForm /></ProtectedRoute>} />
                         <Route path="/my-rides" element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
-                        <Route path="/ride-matches" element={<ProtectedRoute><RideMatches /></ProtectedRoute>} />
                         <Route path="/my-groups" element={<ProtectedRoute><MyGroups /></ProtectedRoute>} />
-                        <Route path="/group" element={<ProtectedRoute><GroupChatPage /></ProtectedRoute>} />
                         <Route path="/ride-map" element={<ProtectedRoute><RideMap /></ProtectedRoute>} />
                         <Route path="/navigation" element={<ProtectedRoute><Navigation /></ProtectedRoute>} />
                         <Route path="*" element={<Navigate to="/" replace />} />
