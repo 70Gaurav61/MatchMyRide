@@ -213,13 +213,13 @@ function RideMap() {
       />
 
       {/* Route Journey Legend */}
-      <div className="absolute bottom-6 left-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-sm max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center gap-2 mb-3 pb-3 border-b">
+      <div className="absolute bottom-6 left-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-sm min-w-50 max-h-[30vh] md:max-h-[80vh] overflow-y-auto">
+        <div className="hidden md:flex items-center gap-2 mb-3 pb-3 border-b">
           <Navigation className="w-5 h-5 text-indigo-600" />
           <h3 className="font-bold text-gray-800 text-lg">Journey Order</h3>
         </div>
         
-        <div className="space-y-2">
+        <div>
           {mapData.waypoints.map((waypoint, index) => {
             const user = group.members.find(m => m.user?._id === waypoint.userId)?.user;
             const color = userColorMap[waypoint.userId] || '#6366f1';
@@ -239,7 +239,7 @@ function RideMap() {
                     {index + 1}
                   </div>
                   {index < mapData.waypoints.length - 1 && (
-                    <div className="w-0.5 h-8 bg-gray-300 my-1"></div>
+                    <div className="w-0.5 h-4 md:h-8 bg-gray-300 my-1"></div>
                   )}
                 </div>
 
@@ -289,8 +289,7 @@ function RideMap() {
       </div>
 
       {/* Group Info Card */}
-      <div className="absolute top-4 right-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-xs">
-        <h3 className="font-bold text-gray-800 mb-2 text-lg">{group.name}</h3>
+      <div className="absolute bottom-6 right-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-xs min-w-35">
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-gray-600">
             <MapPin className="w-4 h-4" />
@@ -314,55 +313,10 @@ function RideMap() {
           </div>
         </div>
         
-        <div className="mt-3 pt-3 border-t">
+        <div className="hidden md:block mt-3 pt-3 border-t">
           <p className="text-xs text-gray-500">
             Optimized route showing all pickups and drops in order
           </p>
-        </div>
-      </div>
-
-      {/* Member Legend */}
-      <div className="absolute bottom-6 right-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-xs">
-        <h3 className="font-semibold text-gray-800 mb-3 text-sm">Group Members</h3>
-        <div className="space-y-2">
-          {group.members.map((member) => {
-            const user = member.user;
-            const color = userColorMap[user._id] || '#6366f1';
-            const isCurrentUser = user._id === currentUser._id;
-
-            return (
-              <div key={user._id} className="flex items-center gap-3">
-                <div 
-                  className="w-3 h-3 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: color }}
-                ></div>
-                
-                {user.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.fullName}
-                    className="w-7 h-7 rounded-full border-2 border-white shadow flex-shrink-0"
-                  />
-                ) : (
-                  <div 
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0"
-                    style={{ backgroundColor: color }}
-                  >
-                    {user.fullName.charAt(0).toUpperCase()}
-                  </div>
-                )}
-                
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 truncate">
-                    {user.fullName}
-                    {isCurrentUser && (
-                      <span className="ml-1 text-xs text-indigo-600 font-semibold">(You)</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
         </div>
       </div>
     </div>

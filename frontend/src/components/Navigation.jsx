@@ -378,50 +378,38 @@ function Navigation({groupId, initialGroup}) {
 
         {/* Stats Panel - Bottom Right */}
         <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 z-10">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2 pb-2 border-b border-gray-200">
-              <NavigationIcon size={16} className="text-indigo-600" />
-              <span className="font-semibold text-gray-800 text-sm">{group.name}</span>
-              {isTracking && (
-                <div className="ml-auto flex items-center gap-1">
-                  <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
-                </div>
-              )}
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                <MapPin size={12} />
+                <span>Distance</span>
+              </div>
+              <div className="text-sm font-bold text-gray-800">
+                {distanceRemaining !== null ? formatDistance(distanceRemaining) : '--'}
+              </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              <div className="text-center">
-                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                  <MapPin size={12} />
-                  <span>Distance</span>
-                </div>
-                <div className="text-sm font-bold text-gray-800">
-                  {distanceRemaining !== null ? formatDistance(distanceRemaining) : '--'}
-                </div>
+            <div className="w-10 h-px md:w-px md:h-10 bg-gray-200"></div>
+            
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                <Clock size={12} />
+                <span>ETA</span>
               </div>
-              
-              <div className="w-px h-10 bg-gray-200"></div>
-              
-              <div className="text-center">
-                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                  <Clock size={12} />
-                  <span>ETA</span>
-                </div>
-                <div className="text-sm font-bold text-gray-800">
-                  {eta ? eta.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '--'}
-                </div>
+              <div className="text-sm font-bold text-gray-800">
+                {eta ? eta.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '--'}
               </div>
-              
-              <div className="w-px h-10 bg-gray-200"></div>
-              
-              <div className="text-center">
-                <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
-                  <Zap size={12} />
-                  <span>Speed</span>
-                </div>
-                <div className="text-sm font-bold text-gray-800">
-                  {speedKmh > 0 ? `${speedKmh} km/h` : '--'}
-                </div>
+            </div>
+            
+            <div className="w-10 h-px md:w-px md:h-10 bg-gray-200"></div>
+            
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+                <Zap size={12} />
+                <span>Speed</span>
+              </div>
+              <div className="text-sm font-bold text-gray-800">
+                {speedKmh > 0 ? `${speedKmh} km/h` : '--'}
               </div>
             </div>
           </div>
@@ -429,7 +417,7 @@ function Navigation({groupId, initialGroup}) {
         
         {/* Active Users Panel */}
         <div className="absolute bottom-4 left-4 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-lg p-4 max-h-64 overflow-y-auto">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="hidden md:flex items-center gap-2 mb-3">
             <Users size={18} className="text-indigo-600" />
             <h3 className="font-semibold text-gray-800">Active Members</h3>
             <span className="ml-auto text-sm text-gray-500">
