@@ -81,12 +81,12 @@ const RideForm = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-full md:h-screen w-full">
+    <div className="flex flex-col-reverse md:flex-row h-screen w-full">
       {/* Left: Form */}
-      <div className="w-full md:max-w-md p-4 md:p-6 bg-background border-b md:border-b-0 md:border-r border-gray-200">
+      <div className="w-full md:max-w-md p-4 md:p-6 bg-background border-b md:border-b-0 md:border-r">
         <h2 className="text-2xl font-bold mb-4 p-2 hidden md:block">Create Ride</h2>
-        {message && <p className="text-red-500 mb-2">{message}</p>}
-        <form onSubmit={handleCreateRide}>
+        {message && <p className="text-error mb-2">{message}</p>}
+        <form onSubmit={handleCreateRide} className="flex flex-col gap-2">
           <LocationInput
             label="Source"
             value={source}
@@ -99,31 +99,34 @@ const RideForm = () => {
             onChange={handleDestinationChange}
             showCurrentLocationBtn={false}
           />
-          <div className="mt-4">
-            <label className="block mb-1 font-medium">Date & Time</label>
-            <input
-              type="datetime-local"
-              name="datetime"
-              value={formData.datetime}
-              onChange={handleInputChange}
-              className="w-full border rounded px-2 py-1"
-              required
-            />
-          </div>
-          <div className="mt-4">
-            <label className="block mb-1 font-medium">Gender Preference</label>
-            <select
-              name="genderPreference"
-              value={formData.genderPreference}
-              onChange={handleInputChange}
-              className="w-full border rounded px-2 py-1"
-            >
-              <option value="Any">Any</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
+
+          <div className="flex gap-4 items-center md:flex-col md:gap-2">
+            <div className="w-1/2 md:w-full">
+              <label className="block mb-1 font-medium">Date & Time</label>
+              <input
+                type="datetime-local"
+                name="datetime"
+                value={formData.datetime}
+                onChange={handleInputChange}
+                className="w-full border rounded px-2 py-1"
+                required
+              />
+            </div>
+            <div className="w-1/2 md:w-full">
+              <label className="block mb-1 font-medium">Gender Preference</label>
+              <select
+                name="genderPreference"
+                value={formData.genderPreference}
+                onChange={handleInputChange}
+                className="w-full border rounded px-2 py-1"
+              >
+                <option value="Any">Any</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>      
           <div className="flex flex-row gap-2 mt-4">
             <button
               type="button"
