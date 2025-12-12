@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
+import { useUser } from './UserContext';
 
 const SocketContext = createContext(null);
 
@@ -16,6 +17,13 @@ export const SocketProvider = ({ children }) => {
     const [isConnected, setIsConnected] = useState(false);
     const [isReconnecting, setIsReconnecting] = useState(false);
     const socketRef = useRef(null);
+    const { user } = useUser();
+    const userRef = useRef(user);
+
+    // Keep userRef updated
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
 
     useEffect(() => {
         // Create socket connection
@@ -36,6 +44,12 @@ export const SocketProvider = ({ children }) => {
             console.log('Socket connected:', newSocket.id);
             setIsConnected(true);
             setIsReconnecting(false);
+            
+            // Register user to their personal room for receiving invites
+            if (userRef.current?._id) {
+                console.log('Registering user to room:', userRef.current._id);
+                newSocket.emit('register', userRef.current._id);
+            }
         });
 
         newSocket.on('disconnect', (reason) => {
@@ -52,6 +66,12 @@ export const SocketProvider = ({ children }) => {
             console.log('Socket reconnected after', attemptNumber, 'attempts');
             setIsConnected(true);
             setIsReconnecting(false);
+            
+            // Re-register user after reconnection
+            if (userRef.current?._id) {
+                console.log('Re-registering user to room:', userRef.current._id);
+                newSocket.emit('register', userRef.current._id);
+            }
         });
 
         newSocket.on('reconnect_failed', () => {
@@ -69,7 +89,7 @@ export const SocketProvider = ({ children }) => {
             newSocket.removeAllListeners();
             newSocket.disconnect();
         };
-    }, []);
+    }, []); // Empty dependency array - socket created only once
 
     // Socket methods
     const emit = (event, data) => {

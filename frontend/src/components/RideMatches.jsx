@@ -64,7 +64,7 @@ export default function RideMatches({ rideId }) {
             )
             
             if (res.data.group?._id)
-                navigate('/group', { state: { groupId: res.data.group._id } })
+                navigate('/my-groups', { state: { groupId: res.data.group._id } })
             else
                 setMessage('Invalid response from server')
 

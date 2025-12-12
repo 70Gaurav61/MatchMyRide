@@ -2,6 +2,7 @@ import { Group } from "../models/group.model.js";
 import { Message } from "../models/message.model.js";
 import { Ride } from "../models/ride.model.js";
 import { generateOptimizedRoute } from "../utils/mapbox.js"
+import { emitInviteUserToGroup, emitRequestToJoinGroup } from "../utils/socketio.js"
 
 const isGroupAdmin = (group, userId) => {
     return group.admin.toString() === userId.toString();
@@ -12,7 +13,7 @@ const createNewGroup = async (req, res) => {
     const { name, invites = [], rideId } = req.body;
 
     try {
-        const group = await Group.create({
+        let group = await Group.create({
             name: name?.trim() || req.user.fullName + "'s Group",
             admin: req.user._id,
             invites: invites.map(invite => ({
@@ -28,16 +29,13 @@ const createNewGroup = async (req, res) => {
         if (!group) {
             return res.status(500).json({ message: "Failed to create group" });
         }
+        
+        group.admin = req.user;
 
         // Emit socket.io event for all invited users (if socket.io is available)
         if (req.io) {
             for (const invite of group.invites) {
-                req.io.to(invite.user.toString()).emit('group-invited', {
-                    groupId: group._id,
-                    groupName: group.name,
-                    admin: req.user.fullName,
-                    ride: invite.ride
-                });
+                emitInviteUserToGroup(req.io, invite.user, group);
             }
         }
     
@@ -74,7 +72,7 @@ const inviteInGroup = async (req, res) => {
     const { groupId, userId, rideId } = req.body;
 
     try {
-        const group = await Group.findById(groupId);
+        let group = await Group.findById(groupId);
 
         if (!group) {
             return res.status(404).json({ message: "Group not found" });
@@ -104,14 +102,11 @@ const inviteInGroup = async (req, res) => {
 
         await group.save();
 
+        group.admin = req.user;
+
         // Emit real-time invite notification
         if (req.io) {            
-            req.io.to(userId.toString()).emit('group-invite', {
-                groupId: group._id,
-                groupName: group.name,
-                admin: req.user.fullName,
-                ride: rideId
-            });
+            emitInviteUserToGroup(req.io, userId, group);
         }
 
         return res.status(200).json({
@@ -150,7 +145,8 @@ const acceptInvite = async (req, res) => {
         });
         await group.save();
 
-        triggerRouteOptimization(group._id);
+        triggerGroupUpdate(req.io, group._id);
+
         return res.status(200).json({
             message: "Invite accepted successfully",
             group
@@ -178,13 +174,10 @@ const rejectInvite = async (req, res) => {
             return res.status(400).json({ message: "You have no pending invites for this group" });
         }
 
-        const invite = group.invites[inviteIndex];
-
         group.invites.splice(inviteIndex, 1);
         await group.save();
         return res.status(200).json({
             message: "Invite rejected successfully",
-            group
         });
     } catch (error) {
         console.error("Error rejecting invite:", error);
@@ -234,9 +227,10 @@ const requestToJoinGroup = async (req, res) => {
         });
         await group.save();
 
+        emitRequestToJoinGroup(req.io, req.user, group)
+
         return res.status(200).json({
             message: "Request to join group sent successfully",
-            group
         });
     } catch (error) {
         console.error("Error requesting to join group:", error);
@@ -273,7 +267,7 @@ const acceptGroupJoinRequest = async (req, res) => {
         });
         await group.save();
 
-        triggerRouteOptimization(group._id);
+        triggerGroupUpdate(group._id);
 
         return res.status(200).json({
             message: "Join request accepted successfully",
@@ -349,7 +343,7 @@ const removeFromGroup = async (req, res) => {
         group.members.splice(memberIndex, 1);
         await group.save();
 
-        triggerRouteOptimization(group._id);
+        triggerGroupUpdate(group._id);
 
         return res.status(200).json({
             message: "User removed from group successfully",
@@ -379,7 +373,7 @@ const leaveGroup = async (req, res) => {
         group.members.splice(memberIndex, 1);
         await group.save();
 
-        triggerRouteOptimization(group._id);
+        triggerGroupUpdate(group._id);
 
         return res.status(200).json({
             message: "You have left the group successfully",
@@ -605,9 +599,8 @@ const getUserInvites = async (req, res) => {
         const groups = await Group.find({
             'invites.user': userId
         })
-        .populate('invites.ride', 'name')
-        .populate('admin', 'fullName')
-        .select('name invites admin');
+        .populate('admin', 'fullName gender avatar')
+        .select('name admin');
 
         // Filter invites to only those for the current user
         const invites = [];
@@ -618,7 +611,6 @@ const getUserInvites = async (req, res) => {
                         groupId: group._id,
                         groupName: group.name,
                         admin: group.admin,
-                        ride: invite.ride,
                     });
                 }
             }
@@ -649,6 +641,29 @@ const triggerRouteOptimization = async (groupId) => {
     
     await Group.findByIdAndUpdate(groupId, { route: route }, { new: true });
 }
+
+const triggerGroupUpdate = async (io, groupId) => {
+
+    await triggerRouteOptimization(groupId);
+
+    const group = await Group.findById(groupId)
+        .populate({
+            path: 'members.user',
+            select: 'fullName avatar'
+        })
+        .populate('admin', 'fullName avatar')
+        .populate({
+            path: 'members.ride'
+        })
+        .lean();
+
+    if (!group) {
+        return;
+    }
+    io.to(String(groupId)).emit('group-update', { group });
+}
+
+
 
 export {
     createNewGroup,

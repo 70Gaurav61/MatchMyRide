@@ -51,7 +51,7 @@ export default function GroupChat({ groupId, onBack }) {
 
     // 1. Socket Logic
     useEffect(() => {
-        if (!groupId) return;
+        if (!groupId || !isConnected) return;
 
         // Join room
         if (isConnected) joinGroup(groupId);
@@ -63,7 +63,11 @@ export default function GroupChat({ groupId, onBack }) {
             else setTimeout(() => scrollToBottom('smooth'), 100);
         };
 
-        const handleGroupUpdate = (updatedGroup) => setGroup((prev) => ({ ...prev, ...updatedGroup }));
+        const handleGroupUpdate = (data) => {
+            if (data.group) {
+                setGroup(data.group);
+            }
+        }
         
         const handleReadyStatusUpdate = (data) => {
             setGroup((prev) => {
