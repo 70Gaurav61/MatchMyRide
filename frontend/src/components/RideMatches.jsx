@@ -86,7 +86,7 @@ export default function RideMatches({ rideId }) {
         <div className="flex flex-col h-full bg-background relative overflow-hidden">
             
             {/* 1. Header Section */}
-            <div className="p-6 md:p-8 border-b border-border bg-surface shrink-0">
+            <div className="hidden md:block p-6 md:p-7.5 border-b border-border bg-surface shrink-0">
                 <div className="flex justify-between items-end">
                     <div>
                         <h2 className="text-2xl font-bold text-content flex items-center gap-2">

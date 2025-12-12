@@ -377,8 +377,8 @@ function Navigation({groupId, initialGroup}) {
         />
 
         {/* Stats Panel - Bottom Right */}
-        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 z-10">
-          <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="absolute bottom-1 right-0 md:bottom-4 md:right-0 backdrop-blur-sm rounded-lg p-4 z-10">
+          <div className="flex flex-col-reverse md:flex-row items-center gap-4 md:gap-8 md:pr-4 ">
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
                 <MapPin size={12} />
@@ -389,7 +389,7 @@ function Navigation({groupId, initialGroup}) {
               </div>
             </div>
             
-            <div className="w-10 h-px md:w-px md:h-10 bg-gray-200"></div>
+            {/* <div className="w-10 h-px md:w-px md:h-10 bg-gray-200"></div> */}
             
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
@@ -401,7 +401,7 @@ function Navigation({groupId, initialGroup}) {
               </div>
             </div>
             
-            <div className="w-10 h-px md:w-px md:h-10 bg-gray-200"></div>
+            {/* <div className="w-10 h-px md:w-px md:h-10 bg-gray-200"></div> */}
             
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1 flex items-center gap-1">
@@ -416,7 +416,7 @@ function Navigation({groupId, initialGroup}) {
         </div>
         
         {/* Active Users Panel */}
-        <div className="absolute bottom-4 left-4 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-lg p-4 max-h-64 overflow-y-auto">
+        <div className="absolute bottom-1 left-0 md:bottom-4 md:left-4 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-lg shadow-lg p-2 md:p-4 max-h-64 overflow-y-auto z-10">
           <div className="hidden md:flex items-center gap-2 mb-3">
             <Users size={18} className="text-indigo-600" />
             <h3 className="font-semibold text-gray-800">Active Members</h3>

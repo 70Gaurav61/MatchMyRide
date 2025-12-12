@@ -213,7 +213,7 @@ function RideMap() {
       />
 
       {/* Route Journey Legend */}
-      <div className="absolute bottom-6 left-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-sm min-w-50 max-h-[30vh] md:max-h-[80vh] overflow-y-auto">
+      <div className="absolute bottom-0 left-0 z-30 bg-white rounded-lg shadow-xl p-4 max-w-sm min-w-40 max-h-[30vh] md:max-h-[60vh] overflow-y-auto">
         <div className="hidden md:flex items-center gap-2 mb-3 pb-3 border-b">
           <Navigation className="w-5 h-5 text-indigo-600" />
           <h3 className="font-bold text-gray-800 text-lg">Journey Order</h3>
@@ -228,7 +228,7 @@ function RideMap() {
             return (
               <div 
                 key={index}
-                className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-start gap-3 md:p-2 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 {/* Step number and connector */}
                 <div className="flex flex-col items-center">
@@ -289,7 +289,7 @@ function RideMap() {
       </div>
 
       {/* Group Info Card */}
-      <div className="absolute bottom-6 right-4 z-30 bg-white rounded-lg shadow-xl p-4 max-w-xs min-w-35">
+      <div className="absolute bottom-0 right-0 z-30 bg-white rounded-lg shadow-xl p-4 max-w-xs min-w-30">
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-gray-600">
             <MapPin className="w-4 h-4" />

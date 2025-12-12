@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, MapPin, MoreVertical, Users, Clock, Crown, Timer, Navigation as NavIcon } from 'lucide-react';
 
-export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady, onStart, onShowGroupInfo, countdownEndTime }) {
+export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady, onStart, onShowGroupInfo, countdownEndTime, onBack }) {
     
     const navigate = useNavigate();
     const [showOptionsMenu, setShowOptionsMenu] = useState(false);
@@ -57,7 +57,7 @@ export default function GroupHeader({ group, currentUser, onLeaveGroup, onReady,
                     
                     {/* Back Button - Visible ONLY on Mobile */}
                     <button
-                        onClick={() => navigate(-1)} // Or pass a prop if using state-based navigation
+                        onClick={onBack} // Or pass a prop if using state-based navigation
                         className="p-2 hover:bg-white/10 rounded-full transition-colors flex-shrink-0 md:hidden"
                         aria-label="Go back"
                     >

@@ -200,6 +200,7 @@ export default function GroupChat({ groupId, onBack }) {
                     onStart={() => startRide(groupId)}
                     onShowGroupInfo={() => setIsDrawerOpen(true)}
                     countdownEndTime={countdownEndTime}
+                    onBack={onBack}
                 />
             </div>
 
