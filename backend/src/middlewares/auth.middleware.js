@@ -7,11 +7,14 @@ const verifyJWT = async(req, res, next) => {
     try {
         const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
         if(!accessToken)
-            throw new ApiError(401, "Unauthorised Access No Token")
+            return res.status(401).json({ message: "Not authenticated, token not found" });
         
-        const decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET)
-        if(!decodedToken)
-            throw new ApiError(401, "Unauthorised Access Invalid Token")
+        let decodedToken;
+        try {
+            decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+        } catch (jwtError) {
+            return res.status(401).json({ message: "Invalid or expired token" });
+        }
     
         const user = await User.findById(decodedToken._id).select("-password -refreshToken")
     

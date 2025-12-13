@@ -13,26 +13,32 @@ import Navigation from './pages/Navigation.jsx';
 import "mapbox-gl/dist/mapbox-gl.css";
 import InviteOverlay from './components/InviteOverlay.jsx'
 
+import { SpeedInsights } from '@vercel/speed-insights/react';
+
 function App() {
     return (
-        <UserProvider>
-            <SocketProvider>
-                <InviteOverlay />
-                <Router>
-                    <Routes>
-                        <Route path="/register" element={<Register />} />
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-                        <Route path="/ride-form" element={<ProtectedRoute><RideForm /></ProtectedRoute>} />
-                        <Route path="/my-rides" element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
-                        <Route path="/my-groups" element={<ProtectedRoute><MyGroups /></ProtectedRoute>} />
-                        <Route path="/ride-map" element={<ProtectedRoute><RideMap /></ProtectedRoute>} />
-                        <Route path="/navigation" element={<ProtectedRoute><Navigation /></ProtectedRoute>} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                </Router>
-            </SocketProvider>
-        </UserProvider>
+        <>
+            <SpeedInsights />
+            
+            <UserProvider>
+                <SocketProvider>
+                    <InviteOverlay />
+                    <Router>
+                        <Routes>
+                            <Route path="/register" element={<Register />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                            <Route path="/ride-form" element={<ProtectedRoute><RideForm /></ProtectedRoute>} />
+                            <Route path="/my-rides" element={<ProtectedRoute><MyRides /></ProtectedRoute>} />
+                            <Route path="/my-groups" element={<ProtectedRoute><MyGroups /></ProtectedRoute>} />
+                            <Route path="/ride-map" element={<ProtectedRoute><RideMap /></ProtectedRoute>} />
+                            <Route path="/navigation" element={<ProtectedRoute><Navigation /></ProtectedRoute>} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </Router>
+                </SocketProvider>
+            </UserProvider>
+        </>
     )
 }
 
