@@ -20,7 +20,16 @@ connectDB()
 
     const io = new SocketIOServer(server, {
         cors: {
-            origin: allowedOrigins,
+            origin: (origin, callback) => {
+                if (!origin) return callback(null, true);
+
+                if (allowedOrigins.includes(origin)) {
+                    return callback(null, true);
+                }
+
+                console.log('Socket CORS blocked origin:', origin);
+                return callback(new Error('Not allowed by Socket.IO CORS'));
+            },
             credentials: true
         },
         pingTimeout: 60000, 
