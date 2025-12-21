@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 const registerUser = async(req, res) => {
 
@@ -55,7 +56,7 @@ const registerUser = async(req, res) => {
         fullName,
         gender,
         contactNumber,
-        avatar: avatar?.url || "http://localhost:3000/images/default_avatar.jpg",
+        avatar: avatar?.url || null,
         location: userLocation,
         password        
     })
@@ -69,7 +70,7 @@ const registerUser = async(req, res) => {
     }
 
     return res
-    .status(200)
+    .status(201)
     .json({
         user: createdUser,
         message: "User Created Successfully"
@@ -139,6 +140,8 @@ const loginUser = async(req, res) => {
     .cookie("refreshToken", refreshToken, secureCookieWithExpiry)
     .json({
         user: loggedInUser,
+        accessToken,
+        refreshToken,
         message: "User Logged In Successfully"
     })
 
@@ -175,22 +178,51 @@ const logoutUser = async(req, res) => {
 }
 
 const getCurrentUser = async (req, res) => {
-	try {
-		const user = await User.findById(req.user._id).select("-password -refreshToken");
-		if (!user) {
-			return res.status(404).json({ message: "User not found" });
-		}
-		return res.status(200).json({ user });
-	} catch (error) {
-		console.error(error);
-		return res.status(500).json({ message: "Internal server error" });
-	}
-};
+  const user = await User.findById(req.user._id)
+    .select("-password -refreshToken")
 
+  if (!user) {
+    throw new ApiError(404, "User not found")
+  }
+
+  return res.status(200).json({ user })
+}
+
+const refreshAccessToken = async (req, res) => {
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
+
+    if(!incomingRefreshToken) {
+        throw new ApiError(401, "Refresh Token not found, please login again")
+    }
+
+    let decoded;
+    try {
+        decoded = jwt.verify( incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET )
+    } catch (error) {
+        throw new ApiError(401, "Invalid Refresh Token, please login again")
+    }
+
+    const user = await User.findById(decoded._id)
+
+    if(!user || user.refreshToken !== incomingRefreshToken) {
+        throw new ApiError(401, "Refresh Token mismatch, please login again")
+    }
+
+    const accessToken = user.generateAccessToken()
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, secureCookieWithExpiry)
+        .json({
+            accessToken,
+            message: "Access Token refreshed successfully"
+        })
+}
 
 export { 
     registerUser,
     loginUser,
     logoutUser,
     getCurrentUser,
+    refreshAccessToken
 }

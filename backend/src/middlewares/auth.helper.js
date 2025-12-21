@@ -21,5 +21,8 @@ export const verifyAccessToken = async (accessToken) => {
     throw new ApiError(401, 'User not found')
   }
 
-  return user
+  return {
+    user,
+    decoded
+  }
 }

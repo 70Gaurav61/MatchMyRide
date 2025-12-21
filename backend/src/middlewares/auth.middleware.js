@@ -4,7 +4,7 @@ const verifyJWT = async (req, res, next) => {
   try {
     const accessToken = req.cookies?.accessToken || req.header('Authorization')?.replace('Bearer ', '')
 
-    const user = await verifyAccessToken(accessToken)
+    const { user } = await verifyAccessToken(accessToken)
     req.user = user
 
     next()

@@ -26,7 +26,6 @@ const userSchema = new Schema(
             trim: true
         },
         avatar: {
-            default: "http://localhost:3000/images/default_avatar.jpg",
             type: String, // cloudinary url
         },
         location: {

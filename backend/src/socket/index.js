@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from 'socket.io'
-import socketAuth from '../middlewares/socketAuth.middleware.js'
+import socketAuth, { setupAutoDisconnect } from '../middlewares/socketAuth.middleware.js'
 import { handleSendMessage, toggleReadyStatus, handleStartRideCountdown } from '../controllers/group.controller.js'
+import { verifyAccessToken } from '../middlewares/auth.helper.js'
 
 export default function initSocket(httpServer) {
 
@@ -27,13 +28,19 @@ export default function initSocket(httpServer) {
 
   io.on('connection', (socket) => {
     console.log('A user connected:', socket.id)
+    const socketUserId = socket.user.id.toString()
+    socket.join(socketUserId)
 
-    socket.on('register', (userId) => {
-      if (userId !== socket.user._id.toString()) {
-        return socket.emit('error', 'Unauthorized user')
+    socket.on('session:refresh', async (data) => {
+      try {
+        const { decoded } = await verifyAccessToken(data.token);  
+        setupAutoDisconnect(socket, decoded.exp);
+        socket.emit('session:refresh-success');
+      } catch (err) {
+        socket.disconnect(true);
       }
-      socket.join(userId)
-    })
+    });
+
 
     socket.on('join-group', (groupId) => socket.join(groupId))
     socket.on('leave-group', (groupId) => socket.leave(groupId))
@@ -51,6 +58,9 @@ export default function initSocket(httpServer) {
     )
 
     socket.on('disconnect', () => {
+      if (socket._expiryTimer) {
+        clearTimeout(socket._expiryTimer)
+      }
       console.log('User disconnected:', socket.id)
     })
   })

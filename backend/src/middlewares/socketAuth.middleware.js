@@ -10,8 +10,9 @@ const socketAuth = async (socket, next) => {
       socket.handshake.headers.authorization?.replace('Bearer ', '') ||
       cookies.accessToken
 
-    const user = await verifyAccessToken(accessToken)
+    const { user, decoded } = await verifyAccessToken(accessToken)
     socket.user = user
+    setupAutoDisconnect(socket, decoded.exp)
 
     next()
   } catch (error) {
@@ -19,4 +20,19 @@ const socketAuth = async (socket, next) => {
   }
 }
 
+const setupAutoDisconnect = (socket, expTimeUnix) => {
+
+  if (socket._expiryTimer) clearTimeout(socket._expiryTimer);
+
+  const expInMs = expTimeUnix * 1000 - Date.now();
+
+  if (expInMs <= 0) return socket.disconnect(true);
+
+  socket._expiryTimer = setTimeout(() => {
+    socket.disconnect(true); 
+  }, expInMs);
+  
+}
+
 export default socketAuth
+export { setupAutoDisconnect }
