@@ -40,10 +40,7 @@ export default function Register(){
 		})
 
 		try {
-			const res = await axios.post('users/register', form, {
-				headers: { 'Content-Type': 'multipart/form-data' },
-				withCredentials: true
-			})
+			const res = await axios.post('users/register', form)
 			setMessage(res.data.message)
 		} catch (err) {
 			setMessage(err.response?.data?.message || 'Registration failed')

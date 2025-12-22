@@ -1,5 +1,6 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import axios from '../api/axiosInstance.js';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import axios, { setLogoutCallback } from '../api/axiosInstance.js';
+import { setAccessToken, clearAccessToken } from "../auth/tokenStore.js";
 
 const UserContext = createContext(null);
 
@@ -28,7 +29,9 @@ export const UserProvider = ({ children }) => {
         initializeUser();
     }, []);
 
-    const login = (userData) => {
+    const login = ({user: userData, accessToken, refreshToken}) => {
+        localStorage.setItem('refreshToken', refreshToken);
+        setAccessToken(accessToken);
         setUser(userData);
         setIsAuthenticated(true);
     };
@@ -43,6 +46,15 @@ export const UserProvider = ({ children }) => {
             setIsAuthenticated(false);
         }
     };
+
+    useEffect(() => {
+        setLogoutCallback(() => {
+            setUser(null);
+            setIsAuthenticated(false);
+            localStorage.removeItem('refreshToken');
+            clearAccessToken();
+        })
+    }, []);
 
     const updateUser = (userData) => {
         setUser(userData);

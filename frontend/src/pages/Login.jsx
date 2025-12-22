@@ -28,10 +28,9 @@ export default function Login() {
         try {
             const res = await axios.post('/users/login', formData)
 
-            login(res.data.user)
+            login(res.data)
             
             setMessage(res.data.message)
-            navigate('/') // Redirect to homepage on success
         } catch (err) {
             setMessage(err.response?.data?.message || 'Login failed')
         }

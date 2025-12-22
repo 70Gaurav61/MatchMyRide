@@ -19,7 +19,7 @@ export default function MyRides() {
     useEffect(() => {
         const fetchRides = async () => {
             try {
-                const res = await axios.get('/rides/user-rides', { withCredentials: true })
+                const res = await axios.get('/rides/user-rides')
                 setRides(res.data.rides)
             } catch (err) {
                 setMessage('Could not fetch your rides')
