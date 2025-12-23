@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, X, ChevronDown, UserPlus } from 'lucide-react';
-import { useUser } from '../context/UserContext';
-import { useSocket } from '../context/SocketContext';
+import { useUser } from '../context/useUser.js';
+import { useSocket } from '../context/useSocket.js';
 import axios from '../api/axiosInstance';
 
 export default function InviteOverlay() {

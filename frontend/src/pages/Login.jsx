@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useUser } from '../context/UserContext'
+import { useUser } from '../context/useUser.js'
 import axios from '../api/axiosInstance.js'
 
 export default function Login() {

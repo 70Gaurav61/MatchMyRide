@@ -1,4 +1,4 @@
-import { useUser } from '../context/UserContext'
+import { useUser } from '../context/useUser.js'
 import { useNavigate } from 'react-router-dom'
 
 export default function Home() {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from '../api/axiosInstance.js'
 import { useNavigate } from 'react-router-dom'
-import { useUser } from '../context/UserContext'
+import { useUser } from '../context/useUser.js'
 
 export default function Register(){
     const [formData, setFormData] = useState({

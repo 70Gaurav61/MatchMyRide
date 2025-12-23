@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
-import { useSocket } from '../context/SocketContext';
+import { useUser } from '../context/useUser.js';
+import { useSocket } from '../context/useSocket.js';
 import MapView from '../components/mapbox/MapView_new';
 import { getDistanceMeters, formatDistance, watchLocation } from '../components/mapbox/mapUtils';
 import { ArrowLeft, Navigation as NavigationIcon, Users, MapPin, Clock, Zap } from 'lucide-react';

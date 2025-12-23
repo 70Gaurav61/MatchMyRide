@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useUser } from '../context/UserContext';
+import { useUser } from '../context/useUser.js';
 import { Server, Coffee, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
 export default function ProtectedRoute({ children }) {

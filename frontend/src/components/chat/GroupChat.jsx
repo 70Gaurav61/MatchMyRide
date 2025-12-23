@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { useUser } from '../../context/UserContext';
-import { useSocket } from '../../context/SocketContext';
+import { useUser } from '../../context/useUser.js';
+import { useSocket } from '../../context/useSocket.js';
 import axios from '../../api/axiosInstance';
 import { ArrowLeft } from 'lucide-react';
 
