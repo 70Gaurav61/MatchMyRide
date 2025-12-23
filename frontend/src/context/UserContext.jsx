@@ -1,8 +1,8 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect } from 'react';
 import axios, { setLogoutCallback } from '../api/axiosInstance.js';
 import { setAccessToken, clearAccessToken } from "../auth/tokenStore.js";
 
-const UserContext = createContext(null);
+export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -65,12 +65,4 @@ export const UserProvider = ({ children }) => {
             {children}
         </UserContext.Provider>
     );
-};
-
-export const useUser = () => {
-    const context = useContext(UserContext);
-    if (!context) {
-        throw new Error('useUser must be used within a UserProvider');
-    }
-    return context;
 };

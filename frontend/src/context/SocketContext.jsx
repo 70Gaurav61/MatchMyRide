@@ -1,23 +1,16 @@
-import { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { createContext, useEffect, useState, useRef } from 'react';
 import io from 'socket.io-client';
-import { useUser } from './UserContext';
+import { useUser } from './useUser.js';
+import { getAccessToken } from '../auth/tokenStore.js'
+import { refreshAccessToken } from '../auth/refreshToken.js';
 
-const SocketContext = createContext(null);
-
-export const useSocket = () => {
-    const context = useContext(SocketContext);
-    if (!context) {
-        throw new Error('useSocket must be used within SocketProvider');
-    }
-    return context;
-};
+export const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-    const [socket, setSocket] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [isReconnecting, setIsReconnecting] = useState(false);
     const socketRef = useRef(null);
-    const { user } = useUser();
+    const { user, isAuthenticated } = useUser();
     const userRef = useRef(user);
 
     // Keep userRef updated
@@ -27,29 +20,40 @@ export const SocketProvider = ({ children }) => {
 
     useEffect(() => {
         // Create socket connection
-        const socketUrl = import.meta.env.VITE_APP_API_URL ? import.meta.env.VITE_APP_API_URL.replace('/api/v1', '') : 'http://localhost:3000';
+        if (!isAuthenticated) {
+            if (socketRef.current) {
+                socketRef.current.removeAllListeners();
+                socketRef.current.disconnect();
+                socketRef.current = null;
+                setIsConnected(false);
+            }
+            return;
+        };
+
+        if(socketRef.current) {
+            return;
+        }
+
+        const socketUrl = import.meta.env.VITE_APP_API_URL 
+            ? import.meta.env.VITE_APP_API_URL.replace('/api/v1', '') 
+            : 'http://localhost:3000';
 
         const newSocket = io(socketUrl, {
-            withCredentials: true,
+            auth: {
+                token: getAccessToken(),
+            },
             reconnection: true,
             reconnectionDelay: 1000,
             reconnectionAttempts: 10,
             transports: ['websocket', 'polling']
         });
         socketRef.current = newSocket;
-        setSocket(newSocket);
 
         // Connection event handlers
         newSocket.on('connect', () => {
             console.log('Socket connected:', newSocket.id);
             setIsConnected(true);
             setIsReconnecting(false);
-            
-            // Register user to their personal room for receiving invites
-            if (userRef.current?._id) {
-                console.log('Registering user to room:', userRef.current._id);
-                newSocket.emit('register', userRef.current._id);
-            }
         });
 
         newSocket.on('disconnect', (reason) => {
@@ -83,13 +87,54 @@ export const SocketProvider = ({ children }) => {
             console.error('Socket error:', error);
         });
 
+        newSocket.on('auth:token-expiring', async () => {
+            try {
+                console.log('Socket token expiring soon. Refreshing...');
+                const newToken = await refreshAccessToken();
+                window.dispatchEvent(new CustomEvent('auth:token-refreshed', { 
+                    detail: { source: 'socket' } 
+                }));
+
+                newSocket.emit('session:refresh', { token: newToken });
+                
+                newSocket.auth.token = newToken;
+                
+            } catch (error) {
+                console.error('Socket refresh failed:', error);
+            }
+        });
+
+        const handleTokenRefresh = (e) => {
+            // improve: if the event was triggered by axios then it is implied that access token has expired and our backend 
+            // would have already invalidated the socket session. So we need to refresh it here.
+
+            if(e.detail?.source === 'socket') {
+                return;
+            }
+
+            const newToken = getAccessToken();
+            console.log('Socket detected token refresh, syncing session...');
+
+            if (newSocket.connected) {
+                newSocket.emit('session:refresh', { token: newToken });
+            }
+
+            // If the socket disconnects 5 mins from now, it needs the NEW token to reconnect
+            newSocket.auth.token = newToken; 
+        };
+
+        window.addEventListener('auth:token-refreshed', handleTokenRefresh);
+
         // Cleanup on unmount
         return () => {
-            console.log('Cleaning up socket connection');
+            window.removeEventListener('auth:token-refreshed', handleTokenRefresh);
             newSocket.removeAllListeners();
             newSocket.disconnect();
+            socketRef.current = null;
+            setIsConnected(false);
+            setIsReconnecting(false);
         };
-    }, []); // Empty dependency array - socket created only once
+    }, [isAuthenticated]);
 
     // Socket methods
     const emit = (event, data) => {
