@@ -1,6 +1,7 @@
 import { Ride } from '../models/ride.model.js';
 import { Group } from '../models/group.model.js';
 import { getRouteGeoJSON } from '../utils/mapbox.js';
+import * as turf from "@turf/turf";
 
 const haversineDistance = (coord1, coord2) => {
   const [lon1, lat1] = coord1;
@@ -123,6 +124,188 @@ export const getRideMatches = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const getRideMatchesV2 = async (req, res) => {
+  try {
+    const { rideId } = req.body;
+
+    // 1. Fetch & Validate
+    const myRide = await Ride.findById(rideId);
+    if (!myRide) return res.status(404).json({ message: "Ride not found" });
+
+    const myStartCoords = myRide.sourceLocation.coordinates;
+    const myEndCoords = myRide.destinationLocation.coordinates;
+    const myTime = new Date(myRide.datetime);
+    const currTime = Date.now();
+
+    if (currTime > myTime.getTime() + 8 * 60 * 60 * 1000) {
+      return res
+        .status(400)
+        .json({ message: "Ride time exceeded for matching" });
+    }
+
+    // 2. Constants
+    const EARTH_RADIUS_METERS = 6378100;
+    const THIRTY_MIN_MS = 30 * 60 * 1000;
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const ROUTE_BUFFER_KM = 2; // How far off-route can the driver pick up?
+
+    // 3. Prep Logic for Case A (Neighbors)
+    const from = turf.point(myStartCoords);
+    const to = turf.point(myEndCoords);
+    const totalDistKm = turf.distance(from, to, { units: "kilometers" });
+    const peerRadiusRadians = (Math.max(totalDistKm, 0.5) * 0.1 * 1000) / EARTH_RADIUS_METERS;
+
+    // Search Polygons for Case B (Others Routes passing near my start & end)
+    const startSearchPoly = turf.circle(myStartCoords, ROUTE_BUFFER_KM, {
+      steps: 32,
+      units: "kilometers",
+    }).geometry;
+    const endSearchPoly = turf.circle(myEndCoords, ROUTE_BUFFER_KM, {
+      steps: 32,
+      units: "kilometers",
+    }).geometry;
+
+    // 4. PREP LOGIC FOR CASE C (Me passing near others start & end)
+    let routeCorridor = null;
+
+    if (myRide.route && myRide.route.coordinates && myRide.route.coordinates.length > 1) {
+      const myRouteLine = turf.lineString(myRide.route.coordinates);
+
+      // Create a "Corridor" Polygon: 2km buffer around the entire route
+      const buffered = turf.buffer(myRouteLine, ROUTE_BUFFER_KM, {
+        units: "kilometers",
+      });
+      routeCorridor = buffered.geometry;
+    }
+
+    // 5. QUERY
+    const orConditions = [
+      // CASE A: Peer Match (Neighbors)
+      {
+        $and: [
+          {
+            datetime: {
+              $gte: new Date(myTime.getTime() - THIRTY_MIN_MS),
+              $lte: new Date(myTime.getTime() + THIRTY_MIN_MS),
+            },
+          },
+          {
+            sourceLocation: {
+              $geoWithin: { $centerSphere: [myStartCoords, peerRadiusRadians] },
+            },
+          },
+          {
+            destinationLocation: {
+              $geoWithin: { $centerSphere: [myEndCoords, peerRadiusRadians] },
+            },
+          },
+        ],
+      },
+      // CASE B: Passenger finding Driver (I intersect THEIR route)
+      {
+        $and: [
+          {
+            datetime: {
+              $gte: new Date(myTime.getTime() - ONE_DAY_MS),
+              $lte: new Date(myTime.getTime() + ONE_DAY_MS),
+            },
+          },
+          { route: { $geoIntersects: { $geometry: startSearchPoly } } },
+          { route: { $geoIntersects: { $geometry: endSearchPoly } } },
+        ],
+      },
+    ];
+
+    // CASE C: THEY are inside MY route corridor
+    if (routeCorridor) {
+      orConditions.push({
+        $and: [
+          { datetime: { $gte: new Date(myTime.getTime() - ONE_DAY_MS), $lte: new Date(myTime.getTime() + ONE_DAY_MS) } },
+          { sourceLocation: { $geoWithin: { $geometry: routeCorridor } } },
+          { destinationLocation: { $geoWithin: { $geometry: routeCorridor } } },
+        ],
+      });
+    }
+
+    // 6. Execute Query
+    const candidates = await Ride.find({
+      user: { $ne: req.user._id },
+      status: "Open",
+      genderPreference: { $in: ["Any", myRide.genderPreference] },
+      $or: orConditions,
+    })
+      .limit(50)
+      .populate("user", "fullName avatar gender")
+      .lean();
+
+    // 7. Filter (Bearing & Sequence)
+    // directionality check
+    const validMatches = candidates.filter((candidate) => {
+      const candStart = candidate.sourceLocation.coordinates;
+      const candEnd = candidate.destinationLocation.coordinates;
+
+      // --- FILTER 1: General Direction (Bearing) ---
+      // Even if points match, we don't want someone going the opposite way.
+      const myBearing = turf.bearing(from, to);
+      const candBearing = turf.bearing(
+        turf.point(candStart),
+        turf.point(candEnd)
+      );
+
+      let bearingDiff = Math.abs(myBearing - candBearing);
+      if (bearingDiff > 180) bearingDiff = 360 - bearingDiff;
+
+      // If deviation > 45 degrees, reject.
+      if (bearingDiff > 45) return false;
+
+      // --- FILTER 2: Sequence Check (Critical for Case B) ---
+      // If overlapping, does the driver hit my Pickup BEFORE my Drop?
+      // This prevents matching a driver going A->B->C with a user wanting C->B.
+
+      if (
+        candidate.route &&
+        candidate.route.coordinates &&
+        candidate.route.coordinates.length > 1
+      ) {
+        const line = turf.lineString(candidate.route.coordinates);
+
+        // Snap my points to their route to find "location" (distance from start)
+        const startSnap = turf.nearestPointOnLine(line, from);
+        const endSnap = turf.nearestPointOnLine(line, to);
+
+        // If pickup happens AFTER drop on their route, it's invalid.
+        if (startSnap.properties.location >= endSnap.properties.location) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    const matchingRideIds = validMatches.map((r) => r._id);
+
+    const matchingGroups = await Group.find({
+      "members.ride": { $in: matchingRideIds },
+      "members.user": { $ne: req.user._id },
+      status: "open",
+    })
+      .populate("members.user", "fullName avatar gender")
+      .populate("admin", "fullName avatar gender")
+      .lean();
+
+    res.status(200).json({
+      rides: validMatches,
+      groups: matchingGroups,
+      method: "v2 - peer proximity + route intersection + groups",
+    });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Server error while finding matches" });
   }
 };
 

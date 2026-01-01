@@ -12,11 +12,6 @@ const socketAuth = async (socket, next) => {
 
     if (!accessToken) {
       throw new Error("Authentication error: No access token provided");
-    } else {
-      console.log(
-        "Socket access token found",
-        accessToken.slice(0, 10) + "..."
-      );
     }
 
     const { user, decoded } = await verifyAccessToken(accessToken);

@@ -27,7 +27,6 @@ export default function initSocket(httpServer) {
   io.use(socketAuth)
 
   io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id)
     const socketUserId = socket.user.id.toString()
     socket.join(socketUserId)
 
@@ -58,10 +57,12 @@ export default function initSocket(httpServer) {
     )
 
     socket.on('disconnect', () => {
-      if (socket._expiryTimer) {
-        clearTimeout(socket._expiryTimer)
+      if (socket._refreshTimer) {
+        clearTimeout(socket._refreshTimer)
       }
-      console.log('User disconnected:', socket.id)
+      if (socket._killTimer) {
+        clearTimeout(socket._killTimer)
+      }
     })
   })
 
