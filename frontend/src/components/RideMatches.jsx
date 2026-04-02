@@ -18,12 +18,13 @@ export default function RideMatches({ rideId }) {
             setLoading(true)
             try {
                 const res = await axios.post(
-                    '/rides/matched',
+                    '/rides/matched-v2',
                     { rideId }
                 )
-                setMatches(res.data.matches)
+                // console.log(res.data);
+                setMatches(res.data.rides)
             } catch (err) {
-                setMessage('Could not fetch matches')
+                setMessage(err.response?.data?.message || 'Could not fetch matches')
             } finally {
                 setLoading(false)
             }
