@@ -3,6 +3,7 @@ import { Group } from '../models/group.model.js';
 import { getRouteGeoJSON } from '../utils/mapbox.js';
 import * as turf from "@turf/turf";
 
+// calculate the shortest distance between two coordinates on the surface of a sphere
 const haversineDistance = (coord1, coord2) => {
   const [lon1, lat1] = coord1;
   const [lon2, lat2] = coord2;
@@ -48,12 +49,12 @@ export const getRideMatches = async (req, res) => {
       ride.sourceLocation.coordinates,
       ride.destinationLocation.coordinates
     );
-    const proximityRadiusMeters = totalDistance * 0.1 * 1000;
+    const proximityRadiusMeters = totalDistance * 0.1 * 1000; //  10% of the ride length in meters
 
     // Step 3: Find candidate rides
     const candidates = await Ride.find({
-      user: { $ne: req.user._id },
-      status: 'Open',
+      user: { $ne: req.user._id }, // don't match with itself
+      status: 'Open', // only match with open rides
       datetime: { $gte: lowerBound, $lte: upperBound },
       genderPreference: { $in: ['Any', ride.genderPreference] },
       sourceLocation: {
@@ -404,6 +405,7 @@ export const updateRideStatus = async (req, res) => {
 
 }
 
+// method to get all the rides of a user
 export const getUserRides = async (req, res) => {
   try {
     const rides = await Ride.find({ user: req.user._id });
@@ -428,7 +430,7 @@ export const getRideGroup = async (req, res) => {
       .populate({
           path: 'members.ride'
       })
-      .lean();
+      .lean(); // return plain js object instead of mongoose object.
 
     if (!group) {
       return res.status(404).json({ message: 'Matching Group not found for this ride' });

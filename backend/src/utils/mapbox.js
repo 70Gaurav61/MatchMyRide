@@ -7,6 +7,7 @@ export async function getRouteGeoJSON(waypoints) {
   const coords = waypoints.map(wp => wp.join(',')).join(';');
   
   const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coords}?geometries=geojson&access_token=${MAPBOX_API_KEY}`;
+  // return the actual road from source to destination using mapbox
   const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch route from Mapbox');
   const data = await res.json();

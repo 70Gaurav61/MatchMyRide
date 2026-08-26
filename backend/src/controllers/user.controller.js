@@ -96,7 +96,8 @@ const generateAccessAndRefreshToken = async(userId) => {
         const refreshToken = user.generateRefreshToken()
     
         user.refreshToken = refreshToken
-        await user.save({ validateBeforeSave: false })
+        // no need to validate when we are saving it intentionally
+        await user.save({ validateBeforeSave: false }) 
     
         return { accessToken, refreshToken }
 
@@ -139,9 +140,11 @@ const loginUser = async(req, res) => {
 
         const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
 
-        const loggedInUser = user.toObject()
-        delete loggedInUser.password
-        delete loggedInUser.refreshToken
+
+
+        const loggedInUser = await User.find({email}).select(
+            "-password -refreshToken"
+        )
 
         return res
         .status(200)
@@ -219,6 +222,9 @@ const getCurrentUser = async (req, res) => {
     })
   }
 }
+
+// method that is used to refresh the access token when it expires
+
 
 const refreshAccessToken = async (req, res) => {
     try {

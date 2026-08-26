@@ -2,6 +2,10 @@ import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 
+import userRouter from "./routes/user.routes.js"
+import rideRouter from "./routes/ride.routes.js"
+import groupRouter from "./routes/group.routes.js"
+
 const app = express()
 
 const allowedOrigins = process.env.CORS_ORIGIN 
@@ -32,9 +36,7 @@ app.use((req, res, next) => {
     next();
 });
 
-import userRouter from "./routes/user.routes.js"
-import rideRouter from "./routes/ride.routes.js"
-import groupRouter from "./routes/group.routes.js"
+
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/rides", rideRouter)

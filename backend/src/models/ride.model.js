@@ -47,7 +47,7 @@ const rideSchema = new mongoose.Schema({
       default: 'LineString'
     },
     coordinates: {
-      type: [[Number]], // Array of [lng, lat]
+      type: [[Number]], // Array of [longitude, latitude]
       required: false
     }
   },
