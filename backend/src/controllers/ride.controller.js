@@ -141,7 +141,8 @@ export const getRideMatchesV2 = async (req, res) => {
     const myTime = new Date(myRide.datetime);
     const currTime = Date.now();
 
-    if (currTime > myTime.getTime() + 8 * 60 * 60 * 1000) {
+    // 8 hours before ride time
+    if (currTime > myTime.getTime() + 8 * 60 * 60 * 1000) { 
       return res
         .status(400)
         .json({ message: "Ride time exceeded for matching" });
@@ -155,6 +156,7 @@ export const getRideMatchesV2 = async (req, res) => {
     const from = turf.point(myStartCoords);
     const to = turf.point(myEndCoords);
     const totalDistKm = turf.distance(from, to, { units: "kilometers" });
+    // 10% of the ride length in meters for radius
     const peerRadiusRadians = (Math.max(totalDistKm, 0.5) * 0.1 * 1000) / EARTH_RADIUS_METERS;
 
     // Dynamic Route Buffer: scale with distance to improve long route matching
@@ -162,11 +164,11 @@ export const getRideMatchesV2 = async (req, res) => {
 
     // Search Polygons for Case B (Others Routes passing near my start & end)
     const startSearchPoly = turf.circle(myStartCoords, ROUTE_BUFFER_KM, {
-      steps: 32,
+      steps: 32, // number of sides of the polygon. More steps = more accurate circle
       units: "kilometers",
     }).geometry;
     const endSearchPoly = turf.circle(myEndCoords, ROUTE_BUFFER_KM, {
-      steps: 32,
+      steps: 32, // number of sides of the polygon. More steps = more accurate circle
       units: "kilometers",
     }).geometry;
 
@@ -225,11 +227,15 @@ export const getRideMatchesV2 = async (req, res) => {
     if (routeCorridor) {
       orConditions.push({
         $and: [
-          { datetime: { $gte: new Date(myTime.getTime() - ONE_DAY_MS), $lte: new Date(myTime.getTime() + ONE_DAY_MS) } },
+          { datetime: { // for other routes, we need to check if they are within 1 day of my ride time
+              $gte: new Date(myTime.getTime() - ONE_DAY_MS), 
+              $lte: new Date(myTime.getTime() + ONE_DAY_MS) } 
+          },
           { sourceLocation: { $geoWithin: { $geometry: routeCorridor } } },
           { destinationLocation: { $geoWithin: { $geometry: routeCorridor } } },
         ],
       });
+      
     }
 
     // 6. Execute Query
